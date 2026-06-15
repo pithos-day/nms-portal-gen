@@ -63,50 +63,6 @@ function getSegColor(charIndex: number): string {
   return "seg-x";
 }
 
-// ─── Glyph SVG Component ─────────────────────────────────────────────────────
-
-const GLYPHS: string[] = [
-  "M4 2 L8 6 L8 10 L4 14 L0 10 L0 6 Z",            // 0 - Hexagon
-  "M4 0 L4 14 M2 0 L6 0",                            // 1 - Pillar
-  "M0 4 Q0 0 4 0 Q8 0 8 4 L8 6 L0 8 L0 14 L8 14",  // 2 - S-curve
-  "M0 0 L8 0 L8 7 L4 7 L8 7 L8 14 L0 14",           // 3 - Z
-  "M0 0 L0 7 L8 7 M8 0 L8 14",                       // 4 - F-mirror
-  "M8 0 L0 0 L0 7 L8 7 L8 14 L0 14",                // 5 - S
-  "M8 0 L0 0 L0 14 L8 14 L8 7 L0 7",                // 6 - E
-  "M0 0 L8 0 L4 14",                                 // 7 - Lambda
-  "M0 4 Q0 0 4 0 Q8 0 8 4 L8 10 Q8 14 4 14 Q0 14 0 10 Z", // 8 - Pill
-  "M8 7 L0 7 L0 0 Q0 0 8 0 L8 14",                  // 9 - P
-  "M0 14 L0 0 L8 7",                                 // A - Arrow
-  "M4 0 L0 7 L0 14 M4 0 L8 7 L8 14",                // B - Y
-  "M8 0 L0 7 L8 14",                                 // C - Chevron
-  "M0 0 L8 7 L0 14",                                 // D - Chevron-R
-  "M0 0 L8 0 L8 4 L0 4 L0 14",                      // E - Gamma
-  "M0 0 L0 14 L4 7 L8 14 L8 0",                     // F - M-down
-];
-
-function GlyphIcon({ index, size = 22 }: { index: number; size?: number }) {
-  const d = GLYPHS[index] ?? GLYPHS[0];
-  const strokeWidth = (1 / size) * 14;
-  return (
-    <svg
-      width={size}
-      height={size * (14 / 8)}
-      viewBox="0 0 8 14"
-      fill="none"
-      aria-hidden="true"
-      style={{ display: "block" }}
-    >
-      <path
-        d={d}
-        stroke="currentColor"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 // ─── Field Component ──────────────────────────────────────────────────────────
 
 interface FieldProps {
@@ -161,7 +117,7 @@ function PortalDisplay({ address }: { address: string }) {
       <div className="portal-glyphs">
         {address.split("").map((ch, i) => (
           <div key={i} className={`glyph-cell ${getSegColor(i)}`}>
-            <GlyphIcon index={charToGlyphIndex(ch)} size={22} />
+            <span className="glyph">{ch}</span>
             <span className="glyph-hex">{ch}</span>
           </div>
         ))}
