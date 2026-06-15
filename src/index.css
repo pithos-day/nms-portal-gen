@@ -1,37 +1,8 @@
-/* ─── CSS Variables & Global Reset ─────────────────────────────────────────── */
-
-:root {
-  --c-bg: #0b0f0d;
-  --c-surface: #111810;
-  --c-surface2: #192117;
-  --c-border: rgba(80, 200, 120, 0.15);
-  --c-border2: rgba(80, 200, 120, 0.3);
-  --c-text: #d4ecd8;
-  --c-muted: #6b917a;
-  --c-planet: #f07a3a;
-  --c-system: #e8c44a;
-  --c-y: #5ec4ff;
-  --c-z: #a87eff;
-  --c-x: #4ed8a0;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-  background: var(--c-bg);
-}
+@import "./global/reset.css";
+@import "./theme/shadcn.css";
+@import "./theme/index.css";
 
 body {
-  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
-  color: var(--c-text);
-  -webkit-font-smoothing: antialiased;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
