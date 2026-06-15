@@ -34,11 +34,11 @@ export function encodeY(raw: number): string {
 }
 
 export function encodePlanet(raw: number): string {
-  return Math.max(0, Math.min(6, raw)).toString(16).toUpperCase();
+  return Math.max(1, Math.min(6, raw)).toString(16).toUpperCase();
 }
 
 export function encodeSystem(raw: number): string {
-  return Math.max(0, Math.min(4095, raw)).toString(16).toUpperCase().padStart(3, "0");
+  return Math.max(1, Math.min(4095, raw)).toString(16).toUpperCase().padStart(3, "0");
 }
 
 /** 12グリフのポータルアドレス文字列を生成する (P SSS YY ZZZ XXX) */
@@ -71,13 +71,13 @@ interface FieldProps {
   value: string;
   onChange: (v: string) => void;
   min: number;
-  max: number;
+  max?: number;
   accentClass: string;
 }
 
 function Field({ label, hint, value, onChange, min, max, accentClass }: FieldProps) {
   const num = parseInt(value) || 0;
-  const inRange = num >= min && num <= max;
+  const inRange = num >= min && (max === undefined || num <= max);
   const showError = value !== "" && !inRange;
 
   return (
@@ -95,7 +95,7 @@ function Field({ label, hint, value, onChange, min, max, accentClass }: FieldPro
         className={`field-input${showError ? " error" : ""}`}
       />
       {showError && (
-        <span className="field-error">範囲: {min} ～ {max}</span>
+        <span className="field-error">範囲: {min} ～ {max ?? "可変"}</span>
       )}
     </div>
   );
@@ -149,11 +149,11 @@ function PortalDisplay({ address }: { address: string }) {
 
 export default function App() {
   const [form, setForm] = useState<FormState>({
-    planet: "0",
-    system: "0",
-    x: "0",
-    y: "0",
-    z: "0",
+    planet: "2",
+    system: "33",
+    x: "1655",
+    y: "1",
+    z: "-704",
   });
 
   const address = useMemo(() => buildPortalAddress(form), [form]);
@@ -178,27 +178,26 @@ export default function App() {
           <p className="section-title">入力パラメータ</p>
           <div className="fields">
             <Field
-              label="P — 惑星番号"
-              hint="0–6"
+              label="惑星番号"
+              hint="1~6"
               value={form.planet}
               onChange={(v) => update("planet", v)}
-              min={0}
+              min={1}
               max={6}
               accentClass="seg-planet"
             />
             <Field
-              label="SSS — 星系番号"
-              hint="0–4095"
+              label="星系番号"
+              hint="1~"
               value={form.system}
               onChange={(v) => update("system", v)}
-              min={0}
-              max={4095}
+              min={1}
               accentClass="seg-system"
             />
             <div className="divider" />
             <Field
-              label="YY — Y座標"
-              hint="-126 ～ 126（銀河面からの高さ）"
+              label="Y座標"
+              hint="-126 ～ 126"
               value={form.y}
               onChange={(v) => update("y", v)}
               min={-126}
@@ -206,8 +205,8 @@ export default function App() {
               accentClass="seg-y"
             />
             <Field
-              label="ZZZ — Z座標"
-              hint="-2047 ～ 2046（南北方向）"
+              label="Z座標"
+              hint="-2047 ～ 2046"
               value={form.z}
               onChange={(v) => update("z", v)}
               min={-2047}
@@ -215,8 +214,8 @@ export default function App() {
               accentClass="seg-z"
             />
             <Field
-              label="XXX — X座標"
-              hint="-2047 ～ 2046（東西方向）"
+              label="X座標"
+              hint="-2047 ～ 2046"
               value={form.x}
               onChange={(v) => update("x", v)}
               min={-2047}
@@ -224,66 +223,12 @@ export default function App() {
               accentClass="seg-x"
             />
           </div>
-
-          <div className="info-box">
-            <p className="info-title">⚠ 銀河中心付近の制限</p>
-            <p className="info-text">
-              XYZ座標が中心から半径3000光年以内の領域はポータルが使用不可能です。
-              中心付近のアドレスはゲーム内でエラーとなる場合があります。
-            </p>
-          </div>
         </section>
 
         {/* ── 右カラム: 結果表示 ── */}
         <section className="result-section">
           <p className="section-title">ポータルアドレス</p>
           <PortalDisplay address={address} />
-
-          <div className="coord-table">
-            <p className="section-title">エンコード詳細</p>
-            <table className="detail-table">
-              <thead>
-                <tr>
-                  <th>セグメント</th>
-                  <th>入力値</th>
-                  <th>Hex</th>
-                  <th>説明</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="seg-planet">P</td>
-                  <td>{form.planet || "0"}</td>
-                  <td className="mono">{encodePlanet(parseInt(form.planet) || 0)}</td>
-                  <td>惑星インデックス</td>
-                </tr>
-                <tr>
-                  <td className="seg-system">SSS</td>
-                  <td>{form.system || "0"}</td>
-                  <td className="mono">{encodeSystem(parseInt(form.system) || 0)}</td>
-                  <td>星系インデックス</td>
-                </tr>
-                <tr>
-                  <td className="seg-y">YY</td>
-                  <td>{form.y || "0"}</td>
-                  <td className="mono">{encodeY(parseInt(form.y) || 0)}</td>
-                  <td>8bit 2の補数</td>
-                </tr>
-                <tr>
-                  <td className="seg-z">ZZZ</td>
-                  <td>{form.z || "0"}</td>
-                  <td className="mono">{encodeXZ(parseInt(form.z) || 0)}</td>
-                  <td>12bit 2の補数</td>
-                </tr>
-                <tr>
-                  <td className="seg-x">XXX</td>
-                  <td>{form.x || "0"}</td>
-                  <td className="mono">{encodeXZ(parseInt(form.x) || 0)}</td>
-                  <td>12bit 2の補数</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </section>
       </div>
     </div>
