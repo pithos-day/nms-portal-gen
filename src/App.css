@@ -134,7 +134,7 @@
 
 .info-box {
   margin-top: 1.5rem;
-    background: rgba(232, 85, 85, 0.06);
+  background: rgba(232, 85, 85, 0.06);
   border: 0.5px solid rgba(232, 85, 85, 0.25);
   border-radius: 6px;
   padding: 12px 14px;
@@ -185,7 +185,7 @@
 }
 
 .glyph {
-  font-family: NMS-Glyphs-Mono;
+  font-family: NMS-Glyphs-Mono, monospace;
   font-size: 42px;
 }
 
@@ -261,11 +261,21 @@
 
 /* ─── Segment Colors ────────────────────────────────────────────────────────── */
 
-.seg-planet { color: var(--c-planet); }
-.seg-system { color: var(--c-system); }
-.seg-y      { color: var(--c-y); }
-.seg-z      { color: var(--c-z); }
-.seg-x      { color: var(--c-x); }
+.seg-planet {
+  color: var(--c-planet);
+}
+.seg-system {
+  color: var(--c-system);
+}
+.seg-y {
+  color: var(--c-y);
+}
+.seg-z {
+  color: var(--c-z);
+}
+.seg-x {
+  color: var(--c-x);
+}
 
 /* ─── Detail Table ──────────────────────────────────────────────────────────── */
 

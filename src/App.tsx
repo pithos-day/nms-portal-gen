@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import "./App.css";
+import { useMemo, useState } from 'react';
+import './App.css';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -25,12 +25,12 @@ function toTwosComplement(value: number, bits: number): number {
 
 export function encodeXZ(raw: number): string {
   const clamped = Math.max(-2047, Math.min(2046, raw));
-  return toTwosComplement(clamped, 12).toString(16).toUpperCase().padStart(3, "0");
+  return toTwosComplement(clamped, 12).toString(16).toUpperCase().padStart(3, '0');
 }
 
 export function encodeY(raw: number): string {
   const clamped = Math.max(-126, Math.min(126, raw));
-  return toTwosComplement(clamped, 8).toString(16).toUpperCase().padStart(2, "0");
+  return toTwosComplement(clamped, 8).toString(16).toUpperCase().padStart(2, '0');
 }
 
 export function encodePlanet(raw: number): string {
@@ -38,7 +38,7 @@ export function encodePlanet(raw: number): string {
 }
 
 export function encodeSystem(raw: number): string {
-  return Math.max(1, Math.min(4095, raw)).toString(16).toUpperCase().padStart(3, "0");
+  return Math.max(1, Math.min(4095, raw)).toString(16).toUpperCase().padStart(3, '0');
 }
 
 /**
@@ -52,24 +52,20 @@ function calcDistance(x: number, y: number, z: number): number {
 
 /** 12グリフのポータルアドレス文字列を生成する (P SSS YY ZZZ XXX) */
 function buildPortalAddress(form: FormState): string {
-  const p = encodePlanet(parseInt(form.planet) || 0);
-  const s = encodeSystem(parseInt(form.system) || 0);
-  const y = encodeY(parseInt(form.y) || 0);
-  const z = encodeXZ(parseInt(form.z) || 0);
-  const x = encodeXZ(parseInt(form.x) || 0);
+  const p = encodePlanet(parseInt(form.planet, 10) || 0);
+  const s = encodeSystem(parseInt(form.system, 10) || 0);
+  const y = encodeY(parseInt(form.y, 10) || 0);
+  const z = encodeXZ(parseInt(form.z, 10) || 0);
+  const x = encodeXZ(parseInt(form.x, 10) || 0);
   return `${p}${s}${y}${z}${x}`;
 }
 
-function charToGlyphIndex(c: string): number {
-  return parseInt(c, 16);
-}
-
 function getSegColor(charIndex: number): string {
-  if (charIndex === 0) return "seg-planet";
-  if (charIndex <= 3) return "seg-system";
-  if (charIndex <= 5) return "seg-y";
-  if (charIndex <= 8) return "seg-z";
-  return "seg-x";
+  if (charIndex === 0) return 'seg-planet';
+  if (charIndex <= 3) return 'seg-system';
+  if (charIndex <= 5) return 'seg-y';
+  if (charIndex <= 8) return 'seg-z';
+  return 'seg-x';
 }
 
 // ─── Field Component ──────────────────────────────────────────────────────────
@@ -86,9 +82,9 @@ interface FieldProps {
 }
 
 function Field({ label, hint, value, onChange, min, max, accentClass, showError }: FieldProps) {
-  const num = parseInt(value) || 0;
+  const num = parseInt(value, 10) || 0;
   const inRange = num >= min && (max === undefined || num <= max);
-  const showRangeError = (value !== "" && !inRange);
+  const showRangeError = value !== '' && !inRange;
 
   return (
     <div className="field">
@@ -102,10 +98,12 @@ function Field({ label, hint, value, onChange, min, max, accentClass, showError 
         min={min}
         max={max}
         onChange={(e) => onChange(e.target.value)}
-        className={`field-input${(showRangeError || showError) ? " error" : ""}`}
+        className={`field-input${showRangeError || showError ? 'error' : ''}`}
       />
       {showRangeError && (
-        <span className="field-error">範囲: {min} ～ {max ?? "可変"}</span>
+        <span className="field-error">
+          範囲: {min} ～ {max ?? '可変'}
+        </span>
       )}
     </div>
   );
@@ -114,19 +112,34 @@ function Field({ label, hint, value, onChange, min, max, accentClass, showError 
 // ─── PortalDisplay Component ──────────────────────────────────────────────────
 
 function PortalDisplay({ address }: { address: string }) {
+  const GLYPH_POSITIONS = [
+    'planet',
+    'sys-0',
+    'sys-1',
+    'sys-2',
+    'y-0',
+    'y-1',
+    'z-0',
+    'z-1',
+    'z-2',
+    'x-0',
+    'x-1',
+    'x-2',
+  ] as const;
+
   const segments = [
-    { chars: address.slice(0, 1),  label: "PLANET", colorClass: "seg-planet" },
-    { chars: address.slice(1, 4),  label: "SYSTEM", colorClass: "seg-system" },
-    { chars: address.slice(4, 6),  label: "Y AXIS", colorClass: "seg-y" },
-    { chars: address.slice(6, 9),  label: "Z AXIS", colorClass: "seg-z" },
-    { chars: address.slice(9, 12), label: "X AXIS", colorClass: "seg-x" },
+    { chars: address.slice(0, 1), label: 'PLANET', colorClass: 'seg-planet' },
+    { chars: address.slice(1, 4), label: 'SYSTEM', colorClass: 'seg-system' },
+    { chars: address.slice(4, 6), label: 'Y AXIS', colorClass: 'seg-y' },
+    { chars: address.slice(6, 9), label: 'Z AXIS', colorClass: 'seg-z' },
+    { chars: address.slice(9, 12), label: 'X AXIS', colorClass: 'seg-x' },
   ];
 
   return (
     <div className="portal-display">
       <div className="portal-glyphs">
-        {address.split("").map((ch, i) => (
-          <div key={i} className={`glyph-cell ${getSegColor(i)}`}>
+        {address.split('').map((ch, i) => (
+          <div key={GLYPH_POSITIONS[i]} className={`glyph-cell ${getSegColor(i)}`}>
             <span className="glyph">{ch}</span>
             <span className="glyph-hex">{ch}</span>
           </div>
@@ -144,10 +157,7 @@ function PortalDisplay({ address }: { address: string }) {
 
       <div className="portal-copy">
         <span className="portal-raw">{address}</span>
-        <button
-          className="copy-btn"
-          onClick={() => navigator.clipboard?.writeText(address)}
-        >
+        <button type="button" className="copy-btn" onClick={() => navigator.clipboard?.writeText(address)}>
           コピー
         </button>
       </div>
@@ -159,19 +169,19 @@ function PortalDisplay({ address }: { address: string }) {
 
 export default function App() {
   const [form, setForm] = useState<FormState>({
-    planet: "2",
-    system: "33",
-    x: "1655",
-    y: "1",
-    z: "-704",
+    planet: '2',
+    system: '33',
+    x: '1655',
+    y: '1',
+    z: '-704',
   });
 
   const address = useMemo(() => buildPortalAddress(form), [form]);
   const distance = useMemo(
-    () => calcDistance(parseInt(form.x) || 0, parseInt(form.y) || 0, parseInt(form.z) || 0),
-    [form.x, form.y, form.z]
+    () => calcDistance(parseInt(form.x, 10) || 0, parseInt(form.y, 10) || 0, parseInt(form.z, 10) || 0),
+    [form.x, form.y, form.z],
   );
-  const isTooClose = distance < 64
+  const isTooClose = distance < 64;
 
   function update(key: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -194,27 +204,27 @@ export default function App() {
           <div className="fields">
             <Field
               label="惑星番号"
-              hint="1~6"
+              hint="1 ~ 6"
               value={form.planet}
-              onChange={(v) => update("planet", v)}
+              onChange={(v) => update('planet', v)}
               min={1}
               max={6}
               accentClass="seg-planet"
             />
             <Field
               label="星系番号"
-              hint="1~"
+              hint="1 ~"
               value={form.system}
-              onChange={(v) => update("system", v)}
+              onChange={(v) => update('system', v)}
               min={1}
               accentClass="seg-system"
             />
             <div className="divider" />
             <Field
               label="Y座標"
-              hint="-126 ～ 126"
+              hint="-126 ~ 126"
               value={form.y}
-              onChange={(v) => update("y", v)}
+              onChange={(v) => update('y', v)}
               min={-126}
               max={126}
               accentClass="seg-y"
@@ -222,9 +232,9 @@ export default function App() {
             />
             <Field
               label="Z座標"
-              hint="-2047 ～ 2046"
+              hint="-2047 ~ 2046"
               value={form.z}
-              onChange={(v) => update("z", v)}
+              onChange={(v) => update('z', v)}
               min={-2047}
               max={2046}
               accentClass="seg-z"
@@ -232,9 +242,9 @@ export default function App() {
             />
             <Field
               label="X座標"
-              hint="-2047 ～ 2046"
+              hint="-2047 ~ 2046"
               value={form.x}
-              onChange={(v) => update("x", v)}
+              onChange={(v) => update('x', v)}
               min={-2047}
               max={2046}
               accentClass="seg-x"
@@ -245,9 +255,7 @@ export default function App() {
           {isTooClose && (
             <div className="info-box">
               <p className="info-title">⚠ 銀河中心付近の制限</p>
-              <p className="info-text">
-                銀河の中心から半径3000光年以内の領域はポータルが使用できません。
-              </p>
+              <p className="info-text">銀河の中心から半径3000光年以内の領域はポータルが使用できません。</p>
             </div>
           )}
         </section>
