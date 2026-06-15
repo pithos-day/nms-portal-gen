@@ -41,6 +41,15 @@ export function encodeSystem(raw: number): string {
   return Math.max(1, Math.min(4095, raw)).toString(16).toUpperCase().padStart(3, "0");
 }
 
+/**
+ * 銀河の中心から3000光年以内には飛べない。
+ * 1つのセクターの範囲は400光年なので、中心となる点が3200光年以内だとエラーになる。
+ * sqrt(calcDistance) * 400 = 銀河の中心からセクターの中心までの距離
+ */
+function calcDistance(x: number, y: number, z: number): number {
+  return x * x + y * y + z * z;
+}
+
 /** 12グリフのポータルアドレス文字列を生成する (P SSS YY ZZZ XXX) */
 function buildPortalAddress(form: FormState): string {
   const p = encodePlanet(parseInt(form.planet) || 0);
@@ -73,12 +82,13 @@ interface FieldProps {
   min: number;
   max?: number;
   accentClass: string;
+  showError?: boolean;
 }
 
-function Field({ label, hint, value, onChange, min, max, accentClass }: FieldProps) {
+function Field({ label, hint, value, onChange, min, max, accentClass, showError }: FieldProps) {
   const num = parseInt(value) || 0;
   const inRange = num >= min && (max === undefined || num <= max);
-  const showError = value !== "" && !inRange;
+  const showRangeError = (value !== "" && !inRange);
 
   return (
     <div className="field">
@@ -92,9 +102,9 @@ function Field({ label, hint, value, onChange, min, max, accentClass }: FieldPro
         min={min}
         max={max}
         onChange={(e) => onChange(e.target.value)}
-        className={`field-input${showError ? " error" : ""}`}
+        className={`field-input${(showRangeError || showError) ? " error" : ""}`}
       />
-      {showError && (
+      {showRangeError && (
         <span className="field-error">範囲: {min} ～ {max ?? "可変"}</span>
       )}
     </div>
@@ -157,6 +167,11 @@ export default function App() {
   });
 
   const address = useMemo(() => buildPortalAddress(form), [form]);
+  const distance = useMemo(
+    () => calcDistance(parseInt(form.x) || 0, parseInt(form.y) || 0, parseInt(form.z) || 0),
+    [form.x, form.y, form.z]
+  );
+  const isTooClose = distance < 64
 
   function update(key: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -203,6 +218,7 @@ export default function App() {
               min={-126}
               max={126}
               accentClass="seg-y"
+              showError={isTooClose}
             />
             <Field
               label="Z座標"
@@ -212,6 +228,7 @@ export default function App() {
               min={-2047}
               max={2046}
               accentClass="seg-z"
+              showError={isTooClose}
             />
             <Field
               label="X座標"
@@ -221,8 +238,18 @@ export default function App() {
               min={-2047}
               max={2046}
               accentClass="seg-x"
+              showError={isTooClose}
             />
           </div>
+
+          {isTooClose && (
+            <div className="info-box">
+              <p className="info-title">⚠ 銀河中心付近の制限</p>
+              <p className="info-text">
+                銀河の中心から半径3000光年以内の領域はポータルが使用できません。
+              </p>
+            </div>
+          )}
         </section>
 
         {/* ── 右カラム: 結果表示 ── */}
