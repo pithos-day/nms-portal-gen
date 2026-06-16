@@ -1,5 +1,11 @@
+import { AlertTriangle, Copy } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import './App.css';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -13,11 +19,6 @@ interface FormState {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/**
- * 2の補数エンコード
- * X/Z: 12bit → 3桁 hex (000–FFF)
- * Y:    8bit → 2桁 hex (00–FF)
- */
 function toTwosComplement(value: number, bits: number): number {
   if (value < 0) return (1 << bits) + value;
   return value;
@@ -41,16 +42,10 @@ export function encodeSystem(raw: number): string {
   return Math.max(1, Math.min(4095, raw)).toString(16).toUpperCase().padStart(3, '0');
 }
 
-/**
- * 銀河の中心から3000光年以内には飛べない。
- * 1つのセクターの範囲は400光年なので、中心となる点が3200光年以内だとエラーになる。
- * sqrt(calcDistance) * 400 = 銀河の中心からセクターの中心までの距離
- */
 function calcDistance(x: number, y: number, z: number): number {
   return x * x + y * y + z * z;
 }
 
-/** 12グリフのポータルアドレス文字列を生成する (P SSS YY ZZZ XXX) */
 function buildPortalAddress(form: FormState): string {
   const p = encodePlanet(parseInt(form.planet, 10) || 0);
   const s = encodeSystem(parseInt(form.system, 10) || 0);
@@ -60,12 +55,12 @@ function buildPortalAddress(form: FormState): string {
   return `${p}${s}${y}${z}${x}`;
 }
 
-function getSegColor(charIndex: number): string {
-  if (charIndex === 0) return 'seg-planet';
-  if (charIndex <= 3) return 'seg-system';
-  if (charIndex <= 5) return 'seg-y';
-  if (charIndex <= 8) return 'seg-z';
-  return 'seg-x';
+function getSegColorClass(charIndex: number): string {
+  if (charIndex === 0) return 'text-orange-400';
+  if (charIndex <= 3) return 'text-yellow-400';
+  if (charIndex <= 5) return 'text-blue-400';
+  if (charIndex <= 8) return 'text-violet-400';
+  return 'text-green-400';
 }
 
 // ─── Field Component ──────────────────────────────────────────────────────────
@@ -77,33 +72,34 @@ interface FieldProps {
   onChange: (v: string) => void;
   min: number;
   max?: number;
-  accentClass: string;
+  labelClass: string;
   showError?: boolean;
 }
 
-function Field({ label, hint, value, onChange, min, max, accentClass, showError }: FieldProps) {
+function Field({ label, hint, value, onChange, min, max, labelClass, showError }: FieldProps) {
   const num = parseInt(value, 10) || 0;
   const inRange = num >= min && (max === undefined || num <= max);
   const showRangeError = value !== '' && !inRange;
+  const hasError = showRangeError || showError;
 
   return (
-    <div className="field">
-      <div className="field-header">
-        <span className={`field-label ${accentClass}`}>{label}</span>
-        <span className="field-hint">{hint}</span>
+    <div className="space-y-1.5">
+      <div className="flex items-baseline justify-between">
+        <Label className={`font-medium text-xs tracking-wide ${labelClass}`}>{label}</Label>
+        <span className="text-muted-foreground text-xs">{hint}</span>
       </div>
-      <input
+      <Input
         type="number"
         value={value}
         min={min}
         max={max}
         onChange={(e) => onChange(e.target.value)}
-        className={`field-input${showRangeError || showError ? 'error' : ''}`}
+        className={`h-8 font-mono text-sm ${hasError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
       />
       {showRangeError && (
-        <span className="field-error">
+        <p className="text-destructive text-xs">
           範囲: {min} ～ {max ?? '可変'}
-        </span>
+        </p>
       )}
     </div>
   );
@@ -111,57 +107,60 @@ function Field({ label, hint, value, onChange, min, max, accentClass, showError 
 
 // ─── PortalDisplay Component ──────────────────────────────────────────────────
 
+const GLYPH_POSITIONS = ['planet', 'sys-0', 'sys-1', 'sys-2', 'y-0', 'y-1', 'z-0', 'z-1', 'z-2', 'x-0', 'x-1', 'x-2'] as const;
+
+const SEGMENTS = [
+  { slice: [0, 1] as [number, number], label: 'PLANET', colorClass: 'text-orange-400' },
+  { slice: [1, 4] as [number, number], label: 'SYSTEM', colorClass: 'text-yellow-400' },
+  { slice: [4, 6] as [number, number], label: 'Y AXIS', colorClass: 'text-blue-400' },
+  { slice: [6, 9] as [number, number], label: 'Z AXIS', colorClass: 'text-violet-400' },
+  { slice: [9, 12] as [number, number], label: 'X AXIS', colorClass: 'text-green-400' },
+];
+
 function PortalDisplay({ address }: { address: string }) {
-  const GLYPH_POSITIONS = [
-    'planet',
-    'sys-0',
-    'sys-1',
-    'sys-2',
-    'y-0',
-    'y-1',
-    'z-0',
-    'z-1',
-    'z-2',
-    'x-0',
-    'x-1',
-    'x-2',
-  ] as const;
-
-  const segments = [
-    { chars: address.slice(0, 1), label: 'PLANET', colorClass: 'seg-planet' },
-    { chars: address.slice(1, 4), label: 'SYSTEM', colorClass: 'seg-system' },
-    { chars: address.slice(4, 6), label: 'Y AXIS', colorClass: 'seg-y' },
-    { chars: address.slice(6, 9), label: 'Z AXIS', colorClass: 'seg-z' },
-    { chars: address.slice(9, 12), label: 'X AXIS', colorClass: 'seg-x' },
-  ];
-
   return (
-    <div className="portal-display">
-      <div className="portal-glyphs">
-        {address.split('').map((ch, i) => (
-          <div key={GLYPH_POSITIONS[i]} className={`glyph-cell ${getSegColor(i)}`}>
-            <span className="glyph">{ch}</span>
-            <span className="glyph-hex">{ch}</span>
-          </div>
-        ))}
-      </div>
+    <Card>
+      <CardContent className="space-y-4 pt-5">
+        {/* グリフ */}
+        <div className="flex flex-wrap gap-1.5">
+          {address.split('').map((ch, i) => (
+            <div key={GLYPH_POSITIONS[i]} className={`flex w-9 flex-col items-center gap-1 ${getSegColorClass(i)}`}>
+              <span className="text-[42px] leading-none" style={{ fontFamily: 'NMS-Glyphs-Mono, monospace' }}>
+                {ch}
+              </span>
+              <span className="font-semibold text-[11px] tracking-wide">{ch}</span>
+            </div>
+          ))}
+        </div>
 
-      <div className="portal-segments">
-        {segments.map((seg) => (
-          <div key={seg.label} className={`seg-label ${seg.colorClass}`}>
-            <span className="seg-chars">{seg.chars}</span>
-            <span className="seg-name">{seg.label}</span>
-          </div>
-        ))}
-      </div>
+        <Separator />
 
-      <div className="portal-copy">
-        <span className="portal-raw">{address}</span>
-        <button type="button" className="copy-btn" onClick={() => navigator.clipboard?.writeText(address)}>
-          コピー
-        </button>
-      </div>
-    </div>
+        {/* セグメントラベル */}
+        <div className="flex flex-wrap gap-3">
+          {SEGMENTS.map((seg) => (
+            <div key={seg.label} className={`flex flex-col items-center gap-0.5 ${seg.colorClass}`}>
+              <span className="font-semibold text-base tracking-widest">{address.slice(...seg.slice)}</span>
+              <span className="text-[9px] text-muted-foreground tracking-[0.15em]">{seg.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <Separator />
+
+        {/* コピー行 */}
+        <div className="flex items-center gap-3">
+          <span className="flex-1 font-mono font-semibold text-2xl text-primary tracking-[0.25em]">{address}</span>
+          <button
+            type="button"
+            onClick={() => navigator.clipboard?.writeText(address)}
+            className="flex cursor-pointer items-center gap-1.5 rounded border border-primary px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/10"
+          >
+            <Copy className="h-3 w-3" />
+            コピー
+          </button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -188,83 +187,88 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <header className="header">
-        <div className="header-badge">NMS</div>
-        <div>
-          <h1 className="header-title">Portal Address Generator</h1>
-          <p className="header-sub">No Man's Sky · 銀河座標 → ポータルアドレス変換</p>
-        </div>
-      </header>
-
-      <div className="layout">
-        {/* ── 左カラム: 入力フォーム ── */}
-        <section className="form-section">
-          <p className="section-title">入力パラメータ</p>
-          <div className="fields">
-            <Field
-              label="惑星番号"
-              hint="1 ~ 6"
-              value={form.planet}
-              onChange={(v) => update('planet', v)}
-              min={1}
-              max={6}
-              accentClass="seg-planet"
-            />
-            <Field
-              label="星系番号"
-              hint="1 ~"
-              value={form.system}
-              onChange={(v) => update('system', v)}
-              min={1}
-              accentClass="seg-system"
-            />
-            <div className="divider" />
-            <Field
-              label="Y座標"
-              hint="-126 ~ 126"
-              value={form.y}
-              onChange={(v) => update('y', v)}
-              min={-126}
-              max={126}
-              accentClass="seg-y"
-              showError={isTooClose}
-            />
-            <Field
-              label="Z座標"
-              hint="-2047 ~ 2046"
-              value={form.z}
-              onChange={(v) => update('z', v)}
-              min={-2047}
-              max={2046}
-              accentClass="seg-z"
-              showError={isTooClose}
-            />
-            <Field
-              label="X座標"
-              hint="-2047 ~ 2046"
-              value={form.x}
-              onChange={(v) => update('x', v)}
-              min={-2047}
-              max={2046}
-              accentClass="seg-x"
-              showError={isTooClose}
-            />
+    <div className="min-h-screen bg-background font-mono text-foreground antialiased">
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        {/* ヘッダー */}
+        <header className="mb-10 flex items-center gap-3 border-border border-b pb-6">
+          <Badge className="px-2 py-1 font-semibold text-[11px] tracking-widest">NMS</Badge>
+          <div>
+            <h1 className="font-medium text-xl tracking-wide">Portal Address Generator</h1>
+            <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 銀河座標 → ポータルアドレス変換</p>
           </div>
+        </header>
 
-          {isTooClose && (
-            <div className="info-box">
-              <p className="info-title">⚠ 銀河中心付近の制限</p>
-              <p className="info-text">銀河の中心から半径3000光年以内の領域はポータルが使用できません。</p>
+        {/* 2カラムレイアウト */}
+        <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[340px_1fr]">
+          {/* 左: 入力フォーム */}
+          <section className="space-y-4">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">入力パラメータ</p>
+            <div className="space-y-3.5">
+              <Field
+                label="惑星番号"
+                hint="1 ~ 6"
+                value={form.planet}
+                onChange={(v) => update('planet', v)}
+                min={1}
+                max={6}
+                labelClass="text-orange-400"
+              />
+              <Field
+                label="星系番号"
+                hint="1 ~"
+                value={form.system}
+                onChange={(v) => update('system', v)}
+                min={1}
+                labelClass="text-yellow-400"
+              />
+              <Separator />
+              <Field
+                label="Y座標"
+                hint="-126 ~ 126"
+                value={form.y}
+                onChange={(v) => update('y', v)}
+                min={-126}
+                max={126}
+                labelClass="text-blue-400"
+                showError={isTooClose}
+              />
+              <Field
+                label="Z座標"
+                hint="-2047 ~ 2046"
+                value={form.z}
+                onChange={(v) => update('z', v)}
+                min={-2047}
+                max={2046}
+                labelClass="text-violet-400"
+                showError={isTooClose}
+              />
+              <Field
+                label="X座標"
+                hint="-2047 ~ 2046"
+                value={form.x}
+                onChange={(v) => update('x', v)}
+                min={-2047}
+                max={2046}
+                labelClass="text-green-400"
+                showError={isTooClose}
+              />
             </div>
-          )}
-        </section>
 
-        {/* ── 右カラム: 結果表示 ── */}
-        <section className="result-section">
-          <p className="section-title">ポータルアドレス</p>
-          <PortalDisplay address={address} />
-        </section>
+            {isTooClose && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>銀河中心付近の制限</AlertTitle>
+                <AlertDescription>銀河の中心から半径3000光年以内の領域はポータルが使用できません。</AlertDescription>
+              </Alert>
+            )}
+          </section>
+
+          {/* 右: ポータルアドレス */}
+          <section className="space-y-4">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">ポータルアドレス</p>
+            <PortalDisplay address={address} />
+          </section>
+        </div>
       </div>
     </div>
   );
