@@ -1,0 +1,10 @@
+@import "./reset.css";
+@import "tailwindcss";
+@config "../../tailwind.config.mjs";
+
+@layer base {
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+}
