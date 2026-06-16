@@ -1,5 +1,6 @@
 import { AlertTriangle, Copy, Info } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { CoordViewer } from '@/components/CoordViewer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -278,6 +279,13 @@ export default function App() {
                   <AlertDescription>銀河の中心から半径3000光年以内の領域はポータルが使用できません。</AlertDescription>
                 </Alert>
               )}
+
+              <CoordViewer
+                x={parseInt(form.x, 10) || 0}
+                y={parseInt(form.y, 10) || 0}
+                z={parseInt(form.z, 10) || 0}
+                isTooClose={isTooClose}
+              />
             </section>
 
             {/* 右: ポータルアドレス */}
