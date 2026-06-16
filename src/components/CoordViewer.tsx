@@ -27,19 +27,57 @@ const compassPoints = [
   { px: COMPASS_OFFSET, py: 0, pz: 0, label: 'E' },
 ];
 
+function oklch(l: number, c: number, h: number): string {
+  // L: 0-100, C: 0-0.4くらい, H: degree
+
+  const L = l / 100;
+  const H = (h * Math.PI) / 180;
+
+  // OKLCH → OKLab
+  const a = c * Math.cos(H);
+  const b = c * Math.sin(H);
+
+  // OKLab → LMS
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.291485548 * b;
+
+  const l3 = l_ ** 3;
+  const m3 = m_ ** 3;
+  const s3 = s_ ** 3;
+
+  // LMS → linear RGB
+  let r = +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
+
+  let g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
+
+  let b2 = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3;
+
+  // linear → sRGB
+  const toSrgb = (x: number) => (x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055);
+
+  r = toSrgb(r);
+  g = toSrgb(g);
+  b2 = toSrgb(b2);
+
+  const clamp = (x: number) => Math.min(255, Math.max(0, Math.round(x * 255)));
+
+  return `rgb(${clamp(r)}, ${clamp(g)}, ${clamp(b2)})`;
+}
+
 export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
 
-    const dist = Math.round(Math.sqrt(x * x + y * y + z * z) * 400);
     const isDark = document.documentElement.classList.contains('dark');
-    const textColor = isDark ? '#a1a1aa' : '#71717a';
-    const gridColor = isDark ? '#3f3f46' : '#d4d4d8';
+    const muteFg = isDark ? oklch(70.5, 0.015, 286.067) : oklch(44.2, 0.017, 285.786);
+    const muteBg = oklch(55.2, 0.016, 285.938);
+    const blue = isTooClose ? oklch(70.4, 0.191, 22.216) : oklch(70.7, 0.165, 254.624);
+    const orange = oklch(75, 0.183, 55.934);
     const paperBg = 'rgba(0,0,0,0)';
     const plotBg = 'rgba(0,0,0,0)';
-    const accentColor = isTooClose ? '#ef4444' : '#818cf8';
 
     // 銀河の外縁（XZ平面の円）を描く
     const circleN = 64;
@@ -55,7 +93,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         y: circleZ,
         z: circleY,
         mode: 'lines',
-        line: { color: isDark ? '#52525b' : '#a1a1aa', width: 1 },
+        line: { color: muteFg, width: 1 },
         hoverinfo: 'skip',
         showlegend: false,
       },
@@ -67,7 +105,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         y: [0, 0],
         z: [0, 0],
         mode: 'lines',
-        line: { color: isDark ? '#3f3f46' : '#d4d4d8', width: 1, dash: 'dot' },
+        line: { color: muteBg, width: 1, dash: 'dot' },
         hoverinfo: 'skip',
         showlegend: false,
       },
@@ -79,7 +117,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         y: [-Z_MAX, Z_MAX],
         z: [0, 0],
         mode: 'lines',
-        line: { color: isDark ? '#3f3f46' : '#d4d4d8', width: 1, dash: 'dot' },
+        line: { color: muteBg, width: 1, dash: 'dot' },
         hoverinfo: 'skip',
         showlegend: false,
       },
@@ -92,7 +130,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         z: compassPoints.map((p) => p.pz),
         mode: 'text',
         text: compassPoints.map((p) => p.label),
-        textfont: { size: 11, color: textColor },
+        textfont: { size: 11, color: muteFg },
         hoverinfo: 'skip',
         showlegend: false,
       },
@@ -104,7 +142,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         y: [0],
         z: [0],
         mode: 'markers',
-        marker: { size: 6, color: '#f97316', symbol: 'cross' },
+        marker: { size: 6, color: orange, symbol: 'cross' },
         hoverinfo: 'skip',
         showlegend: false,
       },
@@ -116,7 +154,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         z: [0, y * Y_SCALE],
         mode: 'lines',
         line: {
-          color: accentColor,
+          color: blue,
           width: 1,
           dash: 'solid',
         },
@@ -134,9 +172,9 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         name: '現在地',
         marker: {
           size: 7,
-          color: accentColor,
+          color: blue,
           symbol: 'diamond',
-          line: { color: isDark ? '#c7d2fe' : '#4338ca', width: 1 },
+          line: { color: blue, width: 1 },
         },
         hoverinfo: 'skip',
         showlegend: false,
@@ -170,7 +208,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         },
         dragmode: 'orbit',
       } as Layout['scene'],
-      font: { family: 'monospace', color: textColor },
+      font: { family: 'monospace', color: muteFg },
     };
 
     const config: Partial<Config> = {
