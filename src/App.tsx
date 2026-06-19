@@ -1,6 +1,13 @@
 import { AlertTriangle, Check, ChevronsUpDown, Copy, Info } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { planetName, planetSeeds, portalToGalacticCoords, regionName, systemName } from 'system-name-calculator-ts';
+import {
+  galacticCoordsToPortal,
+  planetName,
+  planetSeeds,
+  portalToGalacticCoords,
+  regionName,
+  systemName,
+} from 'system-name-calculator-ts';
 import { GALAXY_OPTIONS } from '@/assets/galaxies';
 import { CoordViewer } from '@/components/CoordViewer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -62,6 +69,31 @@ function buildPortalAddress(form: FormState): string {
   const x = encodeXZ(parseInt(form.x, 10) || 0);
   return `${p}${s}${y}${z}${x}`;
 }
+
+function fromTwosComplement(value: number, bits: number): number {
+  const mask = 1 << (bits - 1);
+  return value >= mask ? value - (1 << bits) : value;
+}
+
+function parsePortalCode(portal: string): FormState {
+  const hex = portal.toUpperCase();
+  const planet = parseInt(hex[0], 16);
+  const system = parseInt(hex.slice(1, 4), 16);
+  const y = fromTwosComplement(parseInt(hex.slice(4, 6), 16), 8);
+  const z = fromTwosComplement(parseInt(hex.slice(6, 9), 16), 12);
+  const x = fromTwosComplement(parseInt(hex.slice(9, 12), 16), 12);
+  return {
+    galaxy: '1',
+    planet: String(planet),
+    system: String(system),
+    x: String(x),
+    y: String(y),
+    z: String(z),
+  };
+}
+
+const PORTAL_RE = /^[0-9A-F]{12}$/i;
+const COORDS_RE = /^[0-9A-F]{1,4}:[0-9A-F]{1,4}:[0-9A-F]{1,4}:[0-9A-F]{1,4}$/i;
 
 function getSegColorClass(charIndex: number): string {
   if (charIndex === 0) return 'text-orange-400';
@@ -344,11 +376,43 @@ function PortalDisplay({
 
 // AddressInput
 
-function AddressInput() {
+interface AddressInputProps {
+  onLoad: (form: FormState) => void;
+}
+
+function AddressInput({ onLoad }: AddressInputProps) {
+  const [raw, setRaw] = useState('');
+
+  function handleLoad() {
+    const trimmed = raw.trim();
+    if (!trimmed) return;
+
+    try {
+      let portal: string;
+      if (PORTAL_RE.test(trimmed)) {
+        portal = trimmed.toUpperCase();
+      } else if (COORDS_RE.test(trimmed)) {
+        portal = galacticCoordsToPortal(trimmed.toUpperCase());
+      } else {
+        return;
+      }
+      onLoad(parsePortalCode(portal));
+    } catch {
+      // ignore invalid input
+    }
+  }
+
   return (
     <Field orientation="horizontal">
-      <Input placeholder="ポータルアドレスか銀河座標を入力…" />
-      <Button>ロード</Button>
+      <Input
+        placeholder="ポータルアドレスか銀河座標を入力…"
+        value={raw}
+        onChange={(e) => setRaw(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') handleLoad();
+        }}
+      />
+      <Button onClick={handleLoad}>ロード</Button>
     </Field>
   );
 }
@@ -376,7 +440,7 @@ export default function App() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  const portalNumber = BigInt('0x' + address);
+  const portalNumber = BigInt(`0x${address}`);
   const coords = portalToGalacticCoords(portalNumber);
   const galaxyNumber = Number(form.galaxy) - 1;
   const planetNumber = Number(form.planet) - 1;
@@ -384,7 +448,7 @@ export default function App() {
   const ps = planetSeeds(portalNumber, galaxyNumber);
   const planetNames = ps.planet_seeds.map((seed, i) => ({
     index: i + 1,
-    seed: '0x' + seed.toString(16).toUpperCase().padStart(16, '0'),
+    seed: `0x${seed.toString(16).toUpperCase().padStart(16, '0')}`,
     name: planetName(seed),
   }));
   const planetCount = planetNames.length;
@@ -494,7 +558,7 @@ export default function App() {
                 region={regionName(portalNumber, galaxyNumber)}
               />
               <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">既存のアドレスをロード</p>
-              <AddressInput />
+              <AddressInput onLoad={(f) => setForm(f)} />
             </section>
           </div>
         </div>
