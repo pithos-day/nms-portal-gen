@@ -4,7 +4,6 @@ import { planetName, planetSeeds, portalToGalacticCoords, regionName, systemName
 import { GALAXY_OPTIONS } from '@/assets/galaxies';
 import { CoordViewer } from '@/components/CoordViewer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -381,11 +380,10 @@ export default function App() {
       <div className="min-h-screen bg-background font-mono text-foreground antialiased">
         <div className="mx-auto max-w-5xl px-6 py-8">
           {/* ヘッダー */}
-          <header className="mb-10 flex items-center gap-3 border-border border-b pb-6">
-            <Badge className="px-2 py-1 font-semibold text-[11px] tracking-widest">NMS</Badge>
+          <header className="mb-5 flex items-center gap-3 border-border border-b pb-6">
             <div>
-              <h1 className="font-medium text-xl tracking-wide">Portal Address Generator</h1>
-              <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 銀河座標 → ポータルアドレス変換</p>
+              <h1 className="font-medium text-xl tracking-wide">nms-portal-gen</h1>
+              <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 座標 → ポータルアドレス変換</p>
             </div>
           </header>
 
