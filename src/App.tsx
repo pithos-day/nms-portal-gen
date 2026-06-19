@@ -1,17 +1,23 @@
-import { AlertTriangle, Copy, Info } from 'lucide-react';
+import { AlertTriangle, Check, ChevronsUpDown, Copy, Info } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { portalToGalacticCoords } from 'system-name-calculator-ts';
+import { GALAXY_OPTIONS } from '@/assets/galaxies';
 import { CoordViewer } from '@/components/CoordViewer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface FormState {
+  galaxy: string;
   planet: string;
   system: string;
   x: string;
@@ -120,6 +126,124 @@ function Field({ label, tooltip, hint, value, onChange, min, max, labelClass, sh
   );
 }
 
+// Combo Field
+
+// types
+interface ComboOption {
+  id: string;
+  name: string;
+}
+
+interface ComboFieldProps {
+  label: string;
+  tooltip?: string;
+  hint?: string;
+  options: ComboOption[];
+  value: string; // 選択中のid
+  onChange: (id: string) => void;
+  labelClass?: string;
+  showError?: boolean;
+  placeholder?: string;
+}
+
+function ComboField({
+  label,
+  tooltip,
+  hint,
+  options,
+  value,
+  onChange,
+  labelClass,
+  showError,
+  placeholder = 'IDまたは名前で検索...',
+}: ComboFieldProps) {
+  const [open, setOpen] = useState(false);
+
+  const selected = options.find((o) => o.id === value);
+  const hasError = showError;
+
+  return (
+    <div className="space-y-1.5">
+      {/* ── ヘッダー行: Field と完全に同じ構造 ── */}
+      <div className="flex items-baseline justify-between">
+        <Label className={`font-medium text-xs tracking-wide ${labelClass}`}>
+          {label}
+          {tooltip && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>{tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </Label>
+        <span className="text-muted-foreground text-xs">{hint}</span>
+      </div>
+
+      {/* ── コンボボックス本体 ── */}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={`h-8 w-full justify-between font-mono font-normal text-sm ${hasError ? 'border-destructive focus-visible:ring-destructive' : ''}
+              ${!selected ? 'text-muted-foreground' : ''}`}
+          >
+            {selected ? (
+              <span>
+                <span className="text-muted-foreground">{selected.id}</span>
+                {' — '}
+                {selected.name}
+              </span>
+            ) : (
+              placeholder
+            )}
+            <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+          <Command
+            filter={(id, search) => {
+              const opt = options.find((o) => o.id === id);
+              if (!opt) return 0;
+              const q = search.toLowerCase();
+              return opt.id.toLowerCase().includes(q) || opt.name.includes(q) ? 1 : 0;
+            }}
+          >
+            <CommandInput placeholder={placeholder} className="h-8 text-sm" />
+            <CommandList>
+              <CommandEmpty className="py-2 text-center text-muted-foreground text-xs">見つかりません</CommandEmpty>
+              <CommandGroup>
+                {options.map((opt) => (
+                  <CommandItem
+                    key={opt.id}
+                    value={opt.id}
+                    onSelect={(id) => {
+                      onChange(id);
+                      setOpen(false);
+                    }}
+                    className="text-sm"
+                  >
+                    <Check className={`mr-2 h-3.5 w-3.5 ${value === opt.id ? 'opacity-100' : 'opacity-0'}`} />
+                    <span className="w-14 shrink-0 font-mono text-muted-foreground text-xs">{opt.id}</span>
+                    {opt.name}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      {/* ── エラー表示: Field と同じ位置・スタイル ── */}
+      {showError && <p className="text-destructive text-xs">選択してください</p>}
+    </div>
+  );
+}
+
 // ─── PortalDisplay Component ──────────────────────────────────────────────────
 
 const GLYPH_POSITIONS = ['planet', 'sys-0', 'sys-1', 'sys-2', 'y-0', 'y-1', 'z-0', 'z-1', 'z-2', 'x-0', 'x-1', 'x-2'] as const;
@@ -133,6 +257,7 @@ const SEGMENTS = [
 ];
 
 function PortalDisplay({ address }: { address: string }) {
+  const coords = portalToGalacticCoords(BigInt(`0x${address}`));
   return (
     <Card>
       <CardContent className="space-y-4 pt-5">
@@ -162,12 +287,31 @@ function PortalDisplay({ address }: { address: string }) {
 
         <Separator />
 
-        {/* コピー行 */}
-        <div className="flex items-center gap-3">
-          <span className="flex-1 font-mono font-semibold text-2xl text-primary tracking-[0.25em]">{address}</span>
+        <div className="grid grid-cols-[140px_1fr_auto] items-center gap-3">
+          {/* ポータルアドレス */}
+          <span className="text-[12px] text-muted-foreground">ポータルアドレス</span>
+
+          <span className="font-mono font-semibold text-primary text-xl tracking-[0.25em]">{address}</span>
+
           <button
             type="button"
             onClick={() => navigator.clipboard?.writeText(address)}
+            className="flex cursor-pointer items-center gap-1.5 rounded border border-primary px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/10"
+          >
+            <Copy className="h-3 w-3" />
+            コピー
+          </button>
+        </div>
+
+        <div className="grid grid-cols-[140px_1fr_auto] items-center gap-3">
+          {/* 銀河座標 */}
+          <span className="text-[12px] text-muted-foreground">銀河座標</span>
+
+          <span className="font-mono font-semibold text-primary text-xl tracking-[0.25em]">{coords}</span>
+
+          <button
+            type="button"
+            onClick={() => navigator.clipboard?.writeText(coords)}
             className="flex cursor-pointer items-center gap-1.5 rounded border border-primary px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/10"
           >
             <Copy className="h-3 w-3" />
@@ -183,6 +327,7 @@ function PortalDisplay({ address }: { address: string }) {
 
 export default function App() {
   const [form, setForm] = useState<FormState>({
+    galaxy: '1',
     planet: '2',
     system: '33',
     x: '1655',
@@ -220,6 +365,15 @@ export default function App() {
             <section className="space-y-4">
               <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">入力パラメータ</p>
               <div className="space-y-3.5">
+                <ComboField
+                  label="銀河番号"
+                  tooltip="1"
+                  hint="1 ~ 256"
+                  options={GALAXY_OPTIONS}
+                  value={form.galaxy}
+                  onChange={(v) => update('galaxy', v)}
+                  labelClass="text-red-400"
+                />
                 <Field
                   label="惑星番号"
                   tooltip="1,2は全ての惑星に存在します。"
