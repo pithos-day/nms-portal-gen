@@ -380,6 +380,27 @@ interface AddressInputProps {
   onLoad: (form: FormState) => void;
 }
 
+const HEX_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+
+function HexKeypad({ onDigit }: { onDigit: (d: string) => void }) {
+  return (
+    <div className="grid grid-cols-8 gap-1">
+      {HEX_DIGITS.map((d) => (
+        <Button
+          key={d}
+          variant="outline"
+          size="sm"
+          className="h-9 w-full px-0 font-mono text-sm"
+          style={{ fontFamily: 'NMS-Glyphs-Mono, monospace' }}
+          onClick={() => onDigit(d)}
+        >
+          {d}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
 function AddressInput({ onLoad }: AddressInputProps) {
   const [raw, setRaw] = useState('');
 
@@ -402,18 +423,31 @@ function AddressInput({ onLoad }: AddressInputProps) {
     }
   }
 
+  function appendDigit(d: string) {
+    setRaw((prev) => {
+      const next = prev.toUpperCase() + d;
+      if (next.length === 12 && PORTAL_RE.test(next)) {
+        onLoad(parsePortalCode(next));
+      }
+      return next;
+    });
+  }
+
   return (
-    <Field orientation="horizontal">
-      <Input
-        placeholder="ポータルアドレスか銀河座標を入力…"
-        value={raw}
-        onChange={(e) => setRaw(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') handleLoad();
-        }}
-      />
-      <Button onClick={handleLoad}>ロード</Button>
-    </Field>
+    <div className="space-y-2">
+      <Field orientation="horizontal">
+        <Input
+          placeholder="ポータルアドレスか銀河座標を入力…"
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleLoad();
+          }}
+        />
+        <Button onClick={handleLoad}>ロード</Button>
+      </Field>
+      <HexKeypad onDigit={appendDigit} />
+    </div>
   );
 }
 
