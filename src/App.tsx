@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -70,9 +71,9 @@ function getSegColorClass(charIndex: number): string {
   return 'text-green-400';
 }
 
-// ─── Field Component ──────────────────────────────────────────────────────────
+// ─── FormField Component ──────────────────────────────────────────────────────────
 
-interface FieldProps {
+interface FormFieldProps {
   label: string;
   tooltip?: string;
   hint: string;
@@ -84,7 +85,7 @@ interface FieldProps {
   showError?: boolean;
 }
 
-function Field({ label, tooltip, hint, value, onChange, min, max, labelClass, showError }: FieldProps) {
+function FormField({ label, tooltip, hint, value, onChange, min, max, labelClass, showError }: FormFieldProps) {
   const num = parseInt(value, 10) || 0;
   const inRange = num >= min && (max === undefined || num <= max);
   const showRangeError = value !== '' && !inRange;
@@ -125,7 +126,7 @@ function Field({ label, tooltip, hint, value, onChange, min, max, labelClass, sh
   );
 }
 
-// Combo Field
+// Combo FormField
 
 // types
 interface ComboOption {
@@ -163,7 +164,7 @@ function ComboField({
 
   return (
     <div className="space-y-1.5">
-      {/* ── ヘッダー行: Field と完全に同じ構造 ── */}
+      {/* ── ヘッダー行: FormField と完全に同じ構造 ── */}
       <div className="flex items-baseline justify-between">
         <Label className={`font-medium text-xs tracking-wide ${labelClass}`}>
           {label}
@@ -237,7 +238,7 @@ function ComboField({
         </PopoverContent>
       </Popover>
 
-      {/* ── エラー表示: Field と同じ位置・スタイル ── */}
+      {/* ── エラー表示: FormField と同じ位置・スタイル ── */}
       {showError && <p className="text-destructive text-xs">選択してください</p>}
     </div>
   );
@@ -309,14 +310,15 @@ function PortalDisplay({
 
           <span className="font-mono font-semibold text-primary text-xl tracking-[0.25em]">{address}</span>
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => navigator.clipboard?.writeText(address)}
             className="flex cursor-pointer items-center gap-1.5 rounded border border-primary px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/10"
           >
             <Copy className="h-3 w-3" />
             コピー
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-[140px_1fr_auto] items-center gap-3">
@@ -325,17 +327,29 @@ function PortalDisplay({
 
           <span className="font-mono font-semibold text-primary text-xl tracking-[0.25em]">{coords}</span>
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => navigator.clipboard?.writeText(coords)}
             className="flex cursor-pointer items-center gap-1.5 rounded border border-primary px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/10"
           >
             <Copy className="h-3 w-3" />
             コピー
-          </button>
+          </Button>
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// AddressInput
+
+function AddressInput() {
+  return (
+    <Field orientation="horizontal">
+      <Input placeholder="ポータルアドレスか銀河座標を入力…" />
+      <Button>ロード</Button>
+    </Field>
   );
 }
 
@@ -401,7 +415,7 @@ export default function App() {
                   onChange={(v) => update('galaxy', v)}
                   labelClass="text-red-400"
                 />
-                <Field
+                <FormField
                   label="惑星番号"
                   tooltip="1,2は全ての惑星に存在します。"
                   hint={`1 ~ ${String(planetCount)}`}
@@ -411,7 +425,7 @@ export default function App() {
                   max={planetCount}
                   labelClass="text-orange-400"
                 />
-                <Field
+                <FormField
                   label="星系番号"
                   tooltip="121はブラックホール、122はアトラスステーションで固定されています。"
                   hint="1 ~"
@@ -421,7 +435,7 @@ export default function App() {
                   labelClass="text-yellow-400"
                 />
                 <Separator />
-                <Field
+                <FormField
                   label="Y座標"
                   hint="-126 ~ 126"
                   value={form.y}
@@ -431,7 +445,7 @@ export default function App() {
                   labelClass="text-blue-400"
                   showError={isTooClose}
                 />
-                <Field
+                <FormField
                   label="Z座標"
                   hint="-2047 ~ 2046"
                   value={form.z}
@@ -441,7 +455,7 @@ export default function App() {
                   labelClass="text-violet-400"
                   showError={isTooClose}
                 />
-                <Field
+                <FormField
                   label="X座標"
                   hint="-2047 ~ 2046"
                   value={form.x}
@@ -479,6 +493,8 @@ export default function App() {
                 system={systemName(portalNumber, galaxyNumber)}
                 region={regionName(portalNumber, galaxyNumber)}
               />
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">既存のアドレスをロード</p>
+              <AddressInput />
             </section>
           </div>
         </div>
