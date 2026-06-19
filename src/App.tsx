@@ -1,12 +1,12 @@
 import { AlertTriangle, Check, ChevronsUpDown, Copy, Info } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { portalToGalacticCoords } from 'system-name-calculator-ts';
+import { planetName, planetSeeds, portalToGalacticCoords, regionName, systemName } from 'system-name-calculator-ts';
 import { GALAXY_OPTIONS } from '@/assets/galaxies';
 import { CoordViewer } from '@/components/CoordViewer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -256,11 +256,28 @@ const SEGMENTS = [
   { slice: [9, 12] as [number, number], label: 'X AXIS', colorClass: 'text-green-400' },
 ];
 
-function PortalDisplay({ address }: { address: string }) {
-  const coords = portalToGalacticCoords(BigInt(`0x${address}`));
+function PortalDisplay({
+  address,
+  coords,
+  planet,
+  system,
+  region,
+}: {
+  address: string;
+  coords: string;
+  planet: string;
+  system: string;
+  region: string;
+}) {
   return (
     <Card>
-      <CardContent className="space-y-4 pt-5">
+      <CardHeader>
+        <CardTitle>{planet}</CardTitle>
+        <CardDescription>
+          星系 {system} - エリア {region}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4 pt-1">
         {/* グリフ */}
         <div className="flex flex-wrap gap-1.5">
           {address.split('').map((ch, i) => (
@@ -346,6 +363,19 @@ export default function App() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  const portalNumber = BigInt('0x' + address);
+  const coords = portalToGalacticCoords(portalNumber);
+  const galaxyNumber = Number(form.galaxy) - 1;
+  const planetNumber = Number(form.planet) - 1;
+
+  const ps = planetSeeds(portalNumber, galaxyNumber);
+  const planetNames = ps.planet_seeds.map((seed, i) => ({
+    index: i + 1,
+    seed: '0x' + seed.toString(16).toUpperCase().padStart(16, '0'),
+    name: planetName(seed),
+  }));
+  const planetCount = planetNames.length;
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background font-mono text-foreground antialiased">
@@ -367,7 +397,6 @@ export default function App() {
               <div className="space-y-3.5">
                 <ComboField
                   label="銀河番号"
-                  tooltip="1"
                   hint="1 ~ 256"
                   options={GALAXY_OPTIONS}
                   value={form.galaxy}
@@ -377,11 +406,11 @@ export default function App() {
                 <Field
                   label="惑星番号"
                   tooltip="1,2は全ての惑星に存在します。"
-                  hint="1 ~ 6"
+                  hint={`1 ~ ${String(planetCount)}`}
                   value={form.planet}
                   onChange={(v) => update('planet', v)}
                   min={1}
-                  max={6}
+                  max={planetCount}
                   labelClass="text-orange-400"
                 />
                 <Field
@@ -445,7 +474,13 @@ export default function App() {
             {/* 右: ポータルアドレス */}
             <section className="space-y-4">
               <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">ポータルアドレス</p>
-              <PortalDisplay address={address} />
+              <PortalDisplay
+                address={address}
+                coords={coords}
+                planet={planetNames[planetNumber]?.name}
+                system={systemName(portalNumber, galaxyNumber)}
+                region={regionName(portalNumber, galaxyNumber)}
+              />
             </section>
           </div>
         </div>
