@@ -599,6 +599,11 @@ function Main() {
 
   const planetCount = planetNames.length;
 
+  useEffect(() => {
+    const name = planetNames[planetNumber]?.name;
+    document.title = name ? `${name} | nms-portal-gen` : 'nms-portal-gen';
+  }, [planetNames, planetNumber]);
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background font-mono text-foreground antialiased">
