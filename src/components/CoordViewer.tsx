@@ -1,6 +1,6 @@
 import type { Config, Data, Layout } from 'plotly.js';
 import Plotly from 'plotly.js-dist-min';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/i18n';
 
@@ -69,11 +69,22 @@ function oklch(l: number, c: number, h: number): string {
 export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!ref.current) return;
 
-    const isDark = document.documentElement.classList.contains('dark');
     const muteFg = isDark ? oklch(70.5, 0.015, 286.067) : oklch(44.2, 0.017, 285.786);
     const muteBg = oklch(55.2, 0.016, 285.938);
     const blue = isTooClose ? oklch(70.4, 0.191, 22.216) : oklch(70.7, 0.165, 254.624);
@@ -81,14 +92,12 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
     const paperBg = 'rgba(0,0,0,0)';
     const plotBg = 'rgba(0,0,0,0)';
 
-    // 銀河の外縁（XZ平面の円）を描く
     const circleN = 64;
     const circleX = Array.from({ length: circleN + 1 }, (_, i) => X_MAX * Math.cos((i / circleN) * 2 * Math.PI));
     const circleZ = Array.from({ length: circleN + 1 }, (_, i) => Z_MAX * Math.sin((i / circleN) * 2 * Math.PI));
     const circleY = Array.from({ length: circleN + 1 }, () => 0);
 
     const data: Data[] = [
-      // 銀河外縁リング
       {
         type: 'scatter3d',
         x: circleX,
@@ -99,8 +108,6 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         hoverinfo: 'skip',
         showlegend: false,
       },
-
-      // X軸（西東）
       {
         type: 'scatter3d',
         x: [-X_MAX, X_MAX],
@@ -111,8 +118,6 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         hoverinfo: 'skip',
         showlegend: false,
       },
-
-      // Z軸（南北）
       {
         type: 'scatter3d',
         x: [0, 0],
@@ -123,8 +128,6 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         hoverinfo: 'skip',
         showlegend: false,
       },
-
-      // 方位ラベル (N/S/W/E)
       {
         type: 'scatter3d',
         x: compassPoints.map((p) => p.px),
@@ -136,8 +139,6 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         hoverinfo: 'skip',
         showlegend: false,
       },
-
-      // 銀河中心
       {
         type: 'scatter3d',
         x: [0],
@@ -148,23 +149,16 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         hoverinfo: 'skip',
         showlegend: false,
       },
-
       {
         type: 'scatter3d',
         x: [0, x],
         y: [0, z],
         z: [0, y * Y_SCALE],
         mode: 'lines',
-        line: {
-          color: blue,
-          width: 1,
-          dash: 'solid',
-        },
+        line: { color: blue, width: 1, dash: 'solid' },
         hoverinfo: 'skip',
         showlegend: false,
       },
-
-      // 現在地
       {
         type: 'scatter3d',
         x: [x],
@@ -172,12 +166,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         z: [y * Y_SCALE],
         mode: 'markers',
         name: t('viewer.currentLocation'),
-        marker: {
-          size: 7,
-          color: blue,
-          symbol: 'diamond',
-          line: { color: blue, width: 1 },
-        },
+        marker: { size: 7, color: blue, symbol: 'diamond', line: { color: blue, width: 1 } },
         hoverinfo: 'skip',
         showlegend: false,
       },
@@ -224,7 +213,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
     return () => {
       if (el) Plotly.purge(el);
     };
-  }, [x, y, z, isTooClose, t]);
+  }, [x, y, z, isTooClose, t, isDark]);
 
   const dist = Math.round(Math.sqrt(x * x + y * y + z * z) * 400);
 
