@@ -2,6 +2,7 @@ import type { Config, Data, Layout } from 'plotly.js';
 import Plotly from 'plotly.js-dist-min';
 import { useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from '@/i18n';
 
 interface CoordViewerProps {
   x: number;
@@ -67,6 +68,7 @@ function oklch(l: number, c: number, h: number): string {
 
 export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!ref.current) return;
@@ -169,7 +171,7 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
         y: [z],
         z: [y * Y_SCALE],
         mode: 'markers',
-        name: '現在地',
+        name: t('viewer.currentLocation'),
         marker: {
           size: 7,
           color: blue,
@@ -222,16 +224,16 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
     return () => {
       if (el) Plotly.purge(el);
     };
-  }, [x, y, z, isTooClose]);
+  }, [x, y, z, isTooClose, t]);
 
   const dist = Math.round(Math.sqrt(x * x + y * y + z * z) * 400);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>3Dビューア</CardTitle>
+        <CardTitle>{t('viewer.title')}</CardTitle>
         <CardDescription className={`font-mono text-xs ${isTooClose ? 'text-destructive' : 'text-muted-foreground'}`}>
-          中心まで 約 {dist.toLocaleString()} 光年
+          {t('viewer.distance', { dist: dist.toLocaleString() })}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 pt-4 pb-3">

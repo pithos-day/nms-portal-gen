@@ -49,10 +49,14 @@ const en = {
   'about.disclaimerText': "This is a fan-made site and is not affiliated with 'No Man's Sky' or Hello Games.",
   'about.references': 'References',
   'about.ref.portalCoords': 'How Portal Addresses and Galactic Coordinates Work',
-  'about.ref.portalWiki': "Portal | No Man's Sky Wiki | Fandom",
   'about.ref.namingSystem': 'Planet, System, and Region Naming System',
   'about.ref.font': 'Font',
   'about.ref.testData': 'Test Data',
+
+  // CoordViewer
+  'viewer.title': '3D Viewer',
+  'viewer.distance': 'Approx. {dist} light-years to center',
+  'viewer.currentLocation': 'Current Location',
 } as const;
 
 export default en;

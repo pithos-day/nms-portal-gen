@@ -49,10 +49,14 @@ const ja = {
   'about.disclaimerText': "当サイトはファンサイトであり、『No Man's Sky』及びHello Gamesとは一切関係ありません。",
   'about.references': '参考資料',
   'about.ref.portalCoords': 'ポータルアドレス及び銀河座標の仕組み',
-  'about.ref.portalWiki': "ポータル | No Man's Sky (ノーマンズスカイ) 日本語Wiki | Fandom",
   'about.ref.namingSystem': '惑星・星系・エリアの命名システム',
   'about.ref.font': 'フォント',
   'about.ref.testData': 'テスト用データ',
+
+  // CoordViewer
+  'viewer.title': '3Dビューア',
+  'viewer.distance': '中心まで 約 {dist} 光年',
+  'viewer.currentLocation': '現在地',
 } as const;
 
 export default ja;
