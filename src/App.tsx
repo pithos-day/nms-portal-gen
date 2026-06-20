@@ -1,6 +1,6 @@
 import { AlertTriangle, Check, ChevronsUpDown, Copy, Info } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
 import {
   galacticCoordsToPortal,
   planetName,
@@ -452,15 +452,54 @@ function AddressInput({ onLoad }: AddressInputProps) {
   );
 }
 
+// ─── Footer ──────────────────────────────────────────────────────────────────
+
+function Footer() {
+  const location = useLocation();
+  const isAbout = location.pathname === '/about';
+
+  return (
+    <footer className="border-border border-t py-6">
+      <div className="mx-auto max-w-5xl px-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-medium text-xl tracking-wide">nms-portal-gen</h2>
+            <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 座標 → ポータルアドレス変換</p>
+          </div>
+          <nav className="flex gap-4">
+            <Link
+              to="/"
+              className={`text-sm transition-colors hover:text-foreground ${!isAbout ? 'text-foreground' : 'text-muted-foreground'}`}
+            >
+              メイン
+            </Link>
+            <Link
+              to="/about"
+              className={`text-sm transition-colors hover:text-foreground ${isAbout ? 'text-foreground' : 'text-muted-foreground'}`}
+            >
+              About
+            </Link>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 // ─── App ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/about" element={<About />} />
-        <Route path="*" element={<Main />} />
-      </Routes>
+      <div className="flex min-h-screen flex-col">
+        <div className="flex-1">
+          <Routes>
+            <Route path="/about" element={<About />} />
+            <Route path="*" element={<Main />} />
+          </Routes>
+        </div>
+        <Footer />
+      </div>
     </BrowserRouter>
   );
 }
@@ -504,14 +543,6 @@ function Main() {
     <TooltipProvider>
       <div className="min-h-screen bg-background font-mono text-foreground antialiased">
         <div className="mx-auto max-w-5xl px-6 py-8">
-          {/* ヘッダー */}
-          <header className="mb-5 flex items-center gap-3 border-border border-b pb-6">
-            <div>
-              <h1 className="font-medium text-xl tracking-wide">nms-portal-gen</h1>
-              <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 座標 → ポータルアドレス変換</p>
-            </div>
-          </header>
-
           {/* 2カラムレイアウト */}
           <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[340px_1fr]">
             {/* 左: 入力フォーム */}
@@ -614,5 +645,43 @@ function Main() {
 }
 
 function About() {
-  return <p>test</p>;
+  return (
+    <TooltipProvider>
+      <div className="min-h-screen bg-background font-mono text-foreground antialiased">
+        <div className="mx-auto max-w-5xl px-6 py-8">
+          {/* ヘッダー */}
+          <header className="mb-5 flex items-center gap-3 border-border border-b pb-6">
+            <div>
+              <h1 className="font-medium text-xl tracking-wide">nms-portal-gen</h1>
+              <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 座標 → ポータルアドレス変換</p>
+            </div>
+          </header>
+
+          <div className="space-y-8">
+            {/* 免責事項 */}
+            <section className="space-y-4">
+              <h2 className="font-medium text-lg tracking-wide">免責事項</h2>
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-muted-foreground text-sm">【プレースホルダー】免責事項の内容をここに記載します。</p>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* 使用ライブラリ */}
+            <section className="space-y-4">
+              <h2 className="font-medium text-lg tracking-wide">使用ライブラリ</h2>
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-muted-foreground text-sm">
+                    【プレースホルダー】使用しているライブラリのクレジットをここに記載します。
+                  </p>
+                </CardContent>
+              </Card>
+            </section>
+          </div>
+        </div>
+      </div>
+    </TooltipProvider>
+  );
 }
