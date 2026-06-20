@@ -1,7 +1,7 @@
 import type { Config, Data, Layout } from 'plotly.js';
 import Plotly from 'plotly.js-dist-min';
 import { useEffect, useRef } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface CoordViewerProps {
   x: number;
@@ -228,13 +228,13 @@ export function CoordViewer({ x, y, z, isTooClose }: CoordViewerProps) {
 
   return (
     <Card>
+      <CardHeader>
+        <CardTitle>3Dビューア</CardTitle>
+        <CardDescription className={`font-mono text-xs ${isTooClose ? 'text-destructive' : 'text-muted-foreground'}`}>
+          中心まで 約 {dist.toLocaleString()} 光年
+        </CardDescription>
+      </CardHeader>
       <CardContent className="space-y-3 pt-4 pb-3">
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">3Dビューア</p>
-          <span className={`font-mono text-xs ${isTooClose ? 'text-destructive' : 'text-muted-foreground'}`}>
-            中心まで 約 {dist.toLocaleString()} 光年
-          </span>
-        </div>
         <div ref={ref} className="h-64 w-full" />
       </CardContent>
     </Card>
