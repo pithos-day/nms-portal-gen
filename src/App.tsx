@@ -1,5 +1,6 @@
 import { AlertTriangle, Check, ChevronsUpDown, Copy, Info } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import {
   galacticCoordsToPortal,
   planetName,
@@ -454,6 +455,17 @@ function AddressInput({ onLoad }: AddressInputProps) {
 // ─── App ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/about" element={<About />} />
+        <Route path="*" element={<Main />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+function Main() {
   const [form, setForm] = useState<FormState>({
     galaxy: '1',
     planet: '2',
@@ -599,4 +611,8 @@ export default function App() {
       </div>
     </TooltipProvider>
   );
+}
+
+function About() {
+  return <p>test</p>;
 }
