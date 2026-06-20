@@ -1,73 +1,82 @@
-# React + TypeScript + Vite
+# nms-portal-gen
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+No Man's Sky のポータルアドレス・銀河座標変換ツール。
 
-Currently, two official plugins are available:
+銀河座標からポータルアドレスを生成し、逆変換もできます。全256銀河に対応し、3D座標ビジュアライズ、プラネット/システム/リージョン名の自動生成、ダークモット対応、日本語・英語のバイリンガルUIを備えています。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- 銀河座標 ↔ ポータルアドレスの相互変換
+- ポータルグリフのカラーコード表示（NMS-Glyphs-Mono フォント）
+- Plotly.js による 3D 銀河座標ビジュアライゼーション
+- プラネット・システム・リージョン名の自動生成
+- 銀河中心からの距離警告（ポータル使用不可エリア）
+- URL 連携（ポータルアドレスを共有可能）
+- ダーク/ライトテーマ切替（localStorage 永続化）
+- 日本語・英語インターナショナライゼーション
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
 
-## Expanding the ESLint configuration
+### Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- [Node.js](https://nodejs.org/) 18+
+- [pnpm](https://pnpm.io/)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Install & Run
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+pnpm install
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Build
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+pnpm build
 ```
+
+### Lint
+
+```sh
+pnpm lint
+```
+
+## Tech Stack
+
+- [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/)
+- [Tailwind CSS](https://tailwindcss.com/) v4
+- [shadcn/ui](https://ui.shadcn.com/) (radix-nova style)
+- [Plotly.js](https://plotly.com/javascript/) (3D visualization)
+- [Lucide](https://lucide.dev/) (icons)
+- [Biome](https://biomejs.dev/) (linter/formatter)
+
+## Credits
+
+### ソースコード
+
+- [pithos/nms-portal-gen](https://codeberg.org/pithos/nms-portal-gen) — このプロジェクトのリポジトリ
+
+### ポータルアドレス・銀河座標
+
+- [ポータル | No Man's Sky 日本語Wiki | Fandom](https://nomanssky.fandom.com/ja/wiki/ポータル)
+- [Galactic Coordinates - No Man's Sky Wiki](https://nomanssky.fandom.com/wiki/Galactic_Coordinates)
+
+### プラネット・システム・リージョン命名システム
+
+- [stuart/nms_namegen](https://github.com/stuart/nms_namegen) — MIT License
+- [andraemon/SystemNameCalculator](https://github.com/andraemon/SystemNameCalculator) — MIT License
+- [monkeyman192/NMS_translate](https://github.com/monkeyman192/NMS_translate) — MIT License
+- [system-name-calculator-ts](https://codeberg.org/pithos/system-name-calculator-ts) — MIT License
+
+### フォント
+
+- [NMS-Glyphs-Mono by Ghuyajil](https://nomanssky.gamepedia.com/media/hydra/fonts/NMS-Glyphs-Mono.ttf) — CC-BY-SA
+
+### テストデータ
+
+- [No Man's Sky Glyphs](https://glyphs.had.sh)
+
+## License
+
+MIT
