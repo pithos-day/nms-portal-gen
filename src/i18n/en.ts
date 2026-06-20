@@ -33,7 +33,7 @@ const en = {
 
   // Alert
   'alert.galacticCenterTitle': 'Restricted Near Galactic Center',
-  'alert.galacticCenterDesc': 'Portals cannot be used within 3,000 light-years of the galactic center.',
+  'alert.galacticCenterDesc': 'Portals cannot be used within 3,000 LY of the galactic center.',
 
   // PortalDisplay
   'portal.systemRegion': 'System {system} - Region {region}',
@@ -55,7 +55,7 @@ const en = {
 
   // CoordViewer
   'viewer.title': '3D Viewer',
-  'viewer.distance': 'Approx. {dist} light-years to center',
+  'viewer.distance': 'About {dist} LY to center',
   'viewer.currentLocation': 'Current Location',
 } as const;
 
