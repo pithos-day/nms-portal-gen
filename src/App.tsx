@@ -452,6 +452,23 @@ function AddressInput({ onLoad }: AddressInputProps) {
   );
 }
 
+// URL
+
+type ListedUrlProps = {
+  text: string;
+  url: string;
+};
+
+function ListedUrl({ text, url }: ListedUrlProps) {
+  return (
+    <li>
+      <a href={url} className="text-blue-600 visited:text-fuchsia-900 hover:underline">
+        {text}
+      </a>
+    </li>
+  );
+}
+
 // ─── Footer ──────────────────────────────────────────────────────────────────
 
 function Footer() {
@@ -463,24 +480,25 @@ function Footer() {
       <div className="mx-auto max-w-5xl px-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-medium text-xl tracking-wide">nms-portal-gen</h2>
+            <Link to="/">
+              <h2 className="font-medium text-xl tracking-wide">nms-portal-gen</h2>
+            </Link>
             <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 座標 → ポータルアドレス変換</p>
           </div>
+
           <nav className="flex gap-4">
             <Link
-              to="/"
-              className={`text-sm transition-colors hover:text-foreground ${!isAbout ? 'text-foreground' : 'text-muted-foreground'}`}
-            >
-              メイン
-            </Link>
-            <Link
               to="/about"
-              className={`text-sm transition-colors hover:text-foreground ${isAbout ? 'text-foreground' : 'text-muted-foreground'}`}
+              className={`text-sm transition-colors hover:text-foreground ${
+                isAbout ? 'text-foreground' : 'text-muted-foreground'
+              }`}
             >
-              About
+              このサイトについて
             </Link>
           </nav>
         </div>
+
+        <p className="mt-6 text-center text-muted-foreground text-xs">© 2026 pithos</p>
       </div>
     </footer>
   );
@@ -649,33 +667,59 @@ function About() {
     <TooltipProvider>
       <div className="min-h-screen bg-background font-mono text-foreground antialiased">
         <div className="mx-auto max-w-5xl px-6 py-8">
-          {/* ヘッダー */}
-          <header className="mb-5 flex items-center gap-3 border-border border-b pb-6">
-            <div>
-              <h1 className="font-medium text-xl tracking-wide">nms-portal-gen</h1>
-              <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 座標 → ポータルアドレス変換</p>
-            </div>
-          </header>
-
           <div className="space-y-8">
             {/* 免責事項 */}
             <section className="space-y-4">
-              <h2 className="font-medium text-lg tracking-wide">免責事項</h2>
               <Card>
-                <CardContent className="pt-6">
-                  <p className="text-muted-foreground text-sm">【プレースホルダー】免責事項の内容をここに記載します。</p>
+                <CardHeader>
+                  <CardTitle className="font-medium text-lg tracking-wide">免責事項</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground text-sm">
+                    当サイトはファンサイトであり、『No Man's Sky』及びHello Gamesとは一切関係ありません。
+                  </p>
                 </CardContent>
               </Card>
             </section>
 
             {/* 使用ライブラリ */}
             <section className="space-y-4">
-              <h2 className="font-medium text-lg tracking-wide">使用ライブラリ</h2>
               <Card>
-                <CardContent className="pt-6">
-                  <p className="text-muted-foreground text-sm">
-                    【プレースホルダー】使用しているライブラリのクレジットをここに記載します。
-                  </p>
+                <CardHeader>
+                  <CardTitle className="font-medium text-lg tracking-wide">参考資料</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                  <div>
+                    <p className="text-muted-foreground text-sm">ポータルアドレス及び銀河座標の仕組み</p>
+                    <ListedUrl
+                      text="ポータル | No Man's Sky (ノーマンズスカイ) 日本語Wiki | Fandom"
+                      url="https://nomanssky.fandom.com/ja/wiki/ポータル"
+                    />
+                    <ListedUrl
+                      text="Galactic Coordinates - No Man's Sky Wiki"
+                      url="https://nomanssky.fandom.com/wiki/Galactic_Coordinates"
+                    />
+                  </div>
+                  <Separator />
+                  <div>
+                    <p className="text-muted-foreground text-sm">惑星・星系・エリアの命名システム</p>
+                    <ListedUrl text="stuart/nms_namegen" url="https://github.com/stuart/nms_namegen" />
+                    <ListedUrl text="andraemon/SystemNameCalculator" url="https://github.com/andraemon/SystemNameCalculator" />
+                    <ListedUrl text="monkeyman192/NMS_translate" url="https://github.com/monkeyman192/NMS_translate" />
+                  </div>
+                  <Separator />
+                  <div>
+                    <p className="text-muted-foreground text-sm">フォント</p>
+                    <ListedUrl
+                      text="NMS-Glyphs-Mono by Ghuyajil"
+                      url="https://nomanssky.gamepedia.com/media/hydra/fonts/NMS-Glyphs-Mono.ttf"
+                    />
+                  </div>
+                  <Separator />
+                  <div>
+                    <p className="text-muted-foreground text-sm">テスト用データ</p>
+                    <ListedUrl text="No Man's Sky Glyphs" url="https://glyphs.had.sh" />
+                  </div>
                 </CardContent>
               </Card>
             </section>
