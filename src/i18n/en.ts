@@ -47,6 +47,7 @@ const en = {
   // About page
   'about.disclaimer': 'Disclaimer',
   'about.disclaimerText': "This is a fan-made site and is not affiliated with 'No Man's Sky' or Hello Games.",
+  'about.sourceCode': 'The source code is publicly available in the repository below.',
   'about.references': 'References',
   'about.ref.portalCoords': 'How Portal Addresses and Galactic Coordinates Work',
   'about.ref.namingSystem': 'Planet, System, and Region Naming System',

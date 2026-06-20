@@ -47,6 +47,7 @@ const ja = {
   // About page
   'about.disclaimer': '免責事項',
   'about.disclaimerText': "当サイトはファンサイトであり、『No Man's Sky』及びHello Gamesとは一切関係ありません。",
+  'about.sourceCode': 'ソースコードは下記リポジトリで公開されています。',
   'about.references': '参考資料',
   'about.ref.portalCoords': 'ポータルアドレス及び銀河座標の仕組み',
   'about.ref.namingSystem': '惑星・星系・エリアの命名システム',

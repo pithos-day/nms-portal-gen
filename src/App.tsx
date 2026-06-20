@@ -719,6 +719,8 @@ function About() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground text-sm">{t('about.disclaimerText')}</p>
+                  <p className="text-muted-foreground text-sm">{t('about.sourceCode')}</p>
+                  <ListedUrl text="pithos/nms-portal-gen" url="https://codeberg.org/pithos/nms-portal-gen" />
                 </CardContent>
               </Card>
             </section>
