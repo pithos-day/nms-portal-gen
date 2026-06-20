@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, ChevronsUpDown, Copy, Info } from 'lucide-react';
+import { AlertTriangle, Check, ChevronsUpDown, Copy, Globe, Info } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { I18nProvider, useTranslation } from '@/i18n';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -119,6 +120,7 @@ interface FormFieldProps {
 }
 
 function FormField({ label, tooltip, hint, value, onChange, min, max, labelClass, showError }: FormFieldProps) {
+  const { t } = useTranslation();
   const num = parseInt(value, 10) || 0;
   const inRange = num >= min && (max === undefined || num <= max);
   const showRangeError = value !== '' && !inRange;
@@ -150,11 +152,7 @@ function FormField({ label, tooltip, hint, value, onChange, min, max, labelClass
         onChange={(e) => onChange(e.target.value)}
         className={`h-8 font-mono text-sm ${hasError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
       />
-      {showRangeError && (
-        <p className="text-destructive text-xs">
-          範囲: {min} ～ {max ?? '可変'}
-        </p>
-      )}
+      {showRangeError && <p className="text-destructive text-xs">{t('validation.range', { min, max: max ?? 'Variable' })}</p>}
     </div>
   );
 }
@@ -179,18 +177,10 @@ interface ComboFieldProps {
   placeholder?: string;
 }
 
-function ComboField({
-  label,
-  tooltip,
-  hint,
-  options,
-  value,
-  onChange,
-  labelClass,
-  showError,
-  placeholder = 'IDまたは名前で検索...',
-}: ComboFieldProps) {
+function ComboField({ label, tooltip, hint, options, value, onChange, labelClass, showError, placeholder }: ComboFieldProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const resolvedPlaceholder = placeholder ?? t('combo.search');
 
   const selected = options.find((o) => o.id === value);
   const hasError = showError;
@@ -232,7 +222,7 @@ function ComboField({
                 {selected.name}
               </span>
             ) : (
-              placeholder
+              resolvedPlaceholder
             )}
             <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
           </Button>
@@ -246,9 +236,9 @@ function ComboField({
               return opt.id.toLowerCase().includes(q) || opt.name.includes(q) ? 1 : 0;
             }}
           >
-            <CommandInput placeholder={placeholder} className="h-8 text-sm" />
+            <CommandInput placeholder={resolvedPlaceholder} className="h-8 text-sm" />
             <CommandList>
-              <CommandEmpty className="py-2 text-center text-muted-foreground text-xs">見つかりません</CommandEmpty>
+              <CommandEmpty className="py-2 text-center text-muted-foreground text-xs">{t('combo.notFound')}</CommandEmpty>
               <CommandGroup>
                 {options.map((opt) => (
                   <CommandItem
@@ -272,7 +262,7 @@ function ComboField({
       </Popover>
 
       {/* ── エラー表示: FormField と同じ位置・スタイル ── */}
-      {showError && <p className="text-destructive text-xs">選択してください</p>}
+      {showError && <p className="text-destructive text-xs">{t('combo.pleaseSelect')}</p>}
     </div>
   );
 }
@@ -302,13 +292,12 @@ function PortalDisplay({
   system: string;
   region: string;
 }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <CardTitle>{planet}</CardTitle>
-        <CardDescription>
-          星系 {system} - エリア {region}
-        </CardDescription>
+        <CardDescription>{t('portal.systemRegion', { system, region })}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 pt-1">
         {/* グリフ */}
@@ -339,7 +328,7 @@ function PortalDisplay({
 
         <div className="grid grid-cols-[140px_1fr_auto] items-center gap-3">
           {/* ポータルアドレス */}
-          <span className="text-[12px] text-muted-foreground">ポータルアドレス</span>
+          <span className="text-[12px] text-muted-foreground">{t('portal.addressLabel')}</span>
 
           <span className="font-mono font-semibold text-primary text-xl tracking-[0.25em]">{address}</span>
 
@@ -350,13 +339,13 @@ function PortalDisplay({
             className="flex cursor-pointer items-center gap-1.5 rounded border border-primary px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/10"
           >
             <Copy className="h-3 w-3" />
-            コピー
+            {t('btn.copy')}
           </Button>
         </div>
 
         <div className="grid grid-cols-[140px_1fr_auto] items-center gap-3">
           {/* 銀河座標 */}
-          <span className="text-[12px] text-muted-foreground">銀河座標</span>
+          <span className="text-[12px] text-muted-foreground">{t('portal.coordsLabel')}</span>
 
           <span className="font-mono font-semibold text-primary text-xl tracking-[0.25em]">{coords}</span>
 
@@ -367,7 +356,7 @@ function PortalDisplay({
             className="flex cursor-pointer items-center gap-1.5 rounded border border-primary px-3 py-1.5 text-primary text-xs transition-colors hover:bg-primary/10"
           >
             <Copy className="h-3 w-3" />
-            コピー
+            {t('btn.copy')}
           </Button>
         </div>
       </CardContent>
@@ -403,6 +392,7 @@ function HexKeypad({ onDigit }: { onDigit: (d: string) => void }) {
 }
 
 function AddressInput({ onLoad }: AddressInputProps) {
+  const { t } = useTranslation();
   const [raw, setRaw] = useState('');
 
   function handleLoad() {
@@ -438,14 +428,14 @@ function AddressInput({ onLoad }: AddressInputProps) {
     <div className="space-y-2">
       <Field orientation="horizontal">
         <Input
-          placeholder="ポータルアドレスか銀河座標を入力…"
+          placeholder={t('placeholder.addressInput')}
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleLoad();
           }}
         />
-        <Button onClick={handleLoad}>インポート</Button>
+        <Button onClick={handleLoad}>{t('btn.import')}</Button>
       </Field>
       <HexKeypad onDigit={appendDigit} />
     </div>
@@ -473,6 +463,7 @@ function ListedUrl({ text, url }: ListedUrlProps) {
 
 function Footer() {
   const location = useLocation();
+  const { lang, setLang, t } = useTranslation();
   const isAbout = location.pathname === '/about';
 
   return (
@@ -483,18 +474,27 @@ function Footer() {
             <Link to="/">
               <h2 className="font-medium text-xl tracking-wide">nms-portal-gen</h2>
             </Link>
-            <p className="mt-0.5 text-muted-foreground text-xs">No Man's Sky · 座標 → ポータルアドレス変換</p>
+            <p className="mt-0.5 text-muted-foreground text-xs">{t('footer.tagline')}</p>
           </div>
 
-          <nav className="flex gap-4">
+          <nav className="flex items-center gap-4">
             <Link
               to="/about"
               className={`text-sm transition-colors hover:text-foreground ${
                 isAbout ? 'text-foreground' : 'text-muted-foreground'
               }`}
             >
-              このサイトについて
+              {t('footer.about')}
             </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5 text-muted-foreground text-xs"
+              onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}
+            >
+              <Globe className="h-3.5 w-3.5" />
+              {lang === 'ja' ? 'EN' : 'JA'}
+            </Button>
           </nav>
         </div>
 
@@ -508,23 +508,26 @@ function Footer() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <div className="flex min-h-screen flex-col">
-        <div className="flex-1">
-          <Routes>
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<Main />} />
-          </Routes>
+    <I18nProvider>
+      <BrowserRouter>
+        <div className="flex min-h-screen flex-col">
+          <div className="flex-1">
+            <Routes>
+              <Route path="/about" element={<About />} />
+              <Route path="*" element={<Main />} />
+            </Routes>
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
-    </BrowserRouter>
+      </BrowserRouter>
+    </I18nProvider>
   );
 }
 
 function Main() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const isInitialMount = useRef(true);
 
   // Parse initial form state from URL path: /{galaxy}/{portalAddress}
@@ -599,10 +602,10 @@ function Main() {
           <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[340px_1fr]">
             {/* 左: 入力フォーム */}
             <section className="space-y-4">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">入力パラメータ</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">{t('section.inputParams')}</p>
               <div className="space-y-3.5">
                 <ComboField
-                  label="銀河番号"
+                  label={t('label.galaxy')}
                   hint="1 ~ 256"
                   options={GALAXY_OPTIONS}
                   value={form.galaxy}
@@ -610,8 +613,8 @@ function Main() {
                   labelClass="text-red-400"
                 />
                 <ComboField
-                  label="惑星番号"
-                  tooltip="1,2は全ての惑星に存在します。"
+                  label={t('label.planet')}
+                  tooltip={t('tooltip.planet')}
                   hint={`1 ~ ${String(planetCount)}`}
                   options={planetNames}
                   value={form.planet}
@@ -619,8 +622,8 @@ function Main() {
                   labelClass="text-orange-400"
                 />
                 <FormField
-                  label="星系番号"
-                  tooltip="121はブラックホール、122はアトラスステーションで固定されています。"
+                  label={t('label.system')}
+                  tooltip={t('tooltip.system')}
                   hint="1 ~"
                   value={form.system}
                   onChange={(v) => update('system', v)}
@@ -629,7 +632,7 @@ function Main() {
                 />
                 <Separator />
                 <FormField
-                  label="Y座標"
+                  label={t('label.coordY')}
                   hint="-126 ~ 126"
                   value={form.y}
                   onChange={(v) => update('y', v)}
@@ -639,7 +642,7 @@ function Main() {
                   showError={isTooClose}
                 />
                 <FormField
-                  label="Z座標"
+                  label={t('label.coordZ')}
                   hint="-2047 ~ 2046"
                   value={form.z}
                   onChange={(v) => update('z', v)}
@@ -649,7 +652,7 @@ function Main() {
                   showError={isTooClose}
                 />
                 <FormField
-                  label="X座標"
+                  label={t('label.coordX')}
                   hint="-2047 ~ 2046"
                   value={form.x}
                   onChange={(v) => update('x', v)}
@@ -663,8 +666,8 @@ function Main() {
               {isTooClose && (
                 <Alert variant="destructive" className="mt-4">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>銀河中心付近の制限</AlertTitle>
-                  <AlertDescription>銀河の中心から半径3000光年以内の領域はポータルが使用できません。</AlertDescription>
+                  <AlertTitle>{t('alert.galacticCenterTitle')}</AlertTitle>
+                  <AlertDescription>{t('alert.galacticCenterDesc')}</AlertDescription>
                 </Alert>
               )}
 
@@ -678,7 +681,7 @@ function Main() {
 
             {/* 右: ポータルアドレス */}
             <section className="space-y-4">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">ポータルアドレス</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">{t('section.portalAddress')}</p>
               <PortalDisplay
                 address={address}
                 coords={coords}
@@ -686,7 +689,7 @@ function Main() {
                 system={systemName(portalNumber, galaxyNumber)}
                 region={regionName(portalNumber, galaxyNumber)}
               />
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">既知のアドレスをインポート</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">{t('section.importAddress')}</p>
               <AddressInput onLoad={(f) => setForm(f)} />
             </section>
           </div>
@@ -697,6 +700,7 @@ function Main() {
 }
 
 function About() {
+  const { t } = useTranslation();
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background font-mono text-foreground antialiased">
@@ -706,12 +710,10 @@ function About() {
             <section className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-medium text-lg tracking-wide">免責事項</CardTitle>
+                  <CardTitle className="font-medium text-lg tracking-wide">{t('about.disclaimer')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground text-sm">
-                    当サイトはファンサイトであり、『No Man's Sky』及びHello Gamesとは一切関係ありません。
-                  </p>
+                  <p className="text-muted-foreground text-sm">{t('about.disclaimerText')}</p>
                 </CardContent>
               </Card>
             </section>
@@ -720,11 +722,11 @@ function About() {
             <section className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-medium text-lg tracking-wide">参考資料</CardTitle>
+                  <CardTitle className="font-medium text-lg tracking-wide">{t('about.references')}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                   <div>
-                    <p className="text-muted-foreground text-sm">ポータルアドレス及び銀河座標の仕組み</p>
+                    <p className="text-muted-foreground text-sm">{t('about.ref.portalCoords')}</p>
                     <ListedUrl
                       text="ポータル | No Man's Sky (ノーマンズスカイ) 日本語Wiki | Fandom"
                       url="https://nomanssky.fandom.com/ja/wiki/ポータル"
@@ -736,14 +738,14 @@ function About() {
                   </div>
                   <Separator />
                   <div>
-                    <p className="text-muted-foreground text-sm">惑星・星系・エリアの命名システム</p>
+                    <p className="text-muted-foreground text-sm">{t('about.ref.namingSystem')}</p>
                     <ListedUrl text="stuart/nms_namegen" url="https://github.com/stuart/nms_namegen" />
                     <ListedUrl text="andraemon/SystemNameCalculator" url="https://github.com/andraemon/SystemNameCalculator" />
                     <ListedUrl text="monkeyman192/NMS_translate" url="https://github.com/monkeyman192/NMS_translate" />
                   </div>
                   <Separator />
                   <div>
-                    <p className="text-muted-foreground text-sm">フォント</p>
+                    <p className="text-muted-foreground text-sm">{t('about.ref.font')}</p>
                     <ListedUrl
                       text="NMS-Glyphs-Mono by Ghuyajil"
                       url="https://nomanssky.gamepedia.com/media/hydra/fonts/NMS-Glyphs-Mono.ttf"
@@ -751,7 +753,7 @@ function About() {
                   </div>
                   <Separator />
                   <div>
-                    <p className="text-muted-foreground text-sm">テスト用データ</p>
+                    <p className="text-muted-foreground text-sm">{t('about.ref.testData')}</p>
                     <ListedUrl text="No Man's Sky Glyphs" url="https://glyphs.had.sh" />
                   </div>
                 </CardContent>
