@@ -1,6 +1,6 @@
 import { AlertTriangle, Check, ChevronsUpDown, Copy, Info } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
   galacticCoordsToPortal,
   planetName,
@@ -523,16 +523,50 @@ export default function App() {
 }
 
 function Main() {
-  const [form, setForm] = useState<FormState>({
-    galaxy: '1',
-    planet: '2',
-    system: '33',
-    x: '1655',
-    y: '1',
-    z: '-704',
-  });
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isInitialMount = useRef(true);
+
+  // Parse initial form state from URL path: /{galaxy}/{portalAddress}
+  const getInitialForm = (): FormState => {
+    const segments = location.pathname.replace(/^\//, '').split('/');
+    if (segments.length === 2) {
+      const galaxy = segments[0];
+      const portal = segments[1]?.toUpperCase();
+      if (/^\d{1,3}$/.test(galaxy) && Number(galaxy) >= 1 && Number(galaxy) <= 256 && PORTAL_RE.test(portal)) {
+        try {
+          const parsed = parsePortalCode(portal);
+          return { ...parsed, galaxy };
+        } catch {
+          // fall through to default
+        }
+      }
+    }
+    return {
+      galaxy: '1',
+      planet: '2',
+      system: '33',
+      x: '1655',
+      y: '1',
+      z: '-704',
+    };
+  };
+
+  const [form, setForm] = useState<FormState>(getInitialForm);
 
   const address = useMemo(() => buildPortalAddress(form), [form]);
+
+  // Sync URL when form changes (skip initial mount)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    const newPath = `/${form.galaxy}/${address}`;
+    if (location.pathname !== newPath) {
+      navigate(newPath, { replace: true });
+    }
+  }, [form.galaxy, address, navigate, location.pathname]);
   const distance = useMemo(
     () => calcDistance(parseInt(form.x, 10) || 0, parseInt(form.y, 10) || 0, parseInt(form.z, 10) || 0),
     [form.x, form.y, form.z],
