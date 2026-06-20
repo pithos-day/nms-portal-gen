@@ -2,44 +2,12 @@
 
 No Man's Sky のポータルアドレス・銀河座標変換ツール。
 
-銀河座標からポータルアドレスを生成し、逆変換もできます。全256銀河に対応し、3D座標ビジュアライズ、プラネット/システム/リージョン名の自動生成、ダークモット対応、日本語・英語のバイリンガルUIを備えています。
-
 ## Features
 
 - 銀河座標 ↔ ポータルアドレスの相互変換
-- ポータルグリフのカラーコード表示（NMS-Glyphs-Mono フォント）
 - Plotly.js による 3D 銀河座標ビジュアライゼーション
 - プラネット・システム・リージョン名の自動生成
-- 銀河中心からの距離警告（ポータル使用不可エリア）
 - URL 連携（ポータルアドレスを共有可能）
-- ダーク/ライトテーマ切替（localStorage 永続化）
-- 日本語・英語インターナショナライゼーション
-
-## Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) 18+
-- [pnpm](https://pnpm.io/)
-
-### Install & Run
-
-```sh
-pnpm install
-pnpm dev
-```
-
-### Build
-
-```sh
-pnpm build
-```
-
-### Lint
-
-```sh
-pnpm lint
-```
 
 ## Tech Stack
 
@@ -52,10 +20,6 @@ pnpm lint
 - [Biome](https://biomejs.dev/) (linter/formatter)
 
 ## Credits
-
-### ソースコード
-
-- [pithos/nms-portal-gen](https://codeberg.org/pithos/nms-portal-gen) — このプロジェクトのリポジトリ
 
 ### ポータルアドレス・銀河座標
 
