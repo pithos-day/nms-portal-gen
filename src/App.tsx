@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, ChevronsUpDown, Copy, Globe, Info } from 'lucide-react';
+import { AlertTriangle, Check, ChevronsUpDown, Copy, Globe, Info, Moon, Sun } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTheme } from '@/hooks/use-theme';
 import { I18nProvider, useTranslation } from '@/i18n';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -464,6 +465,7 @@ function ListedUrl({ text, url }: ListedUrlProps) {
 function Footer() {
   const location = useLocation();
   const { lang, setLang, t } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
   const isAbout = location.pathname === '/about';
 
   return (
@@ -494,6 +496,9 @@ function Footer() {
             >
               <Globe className="h-3.5 w-3.5" />
               {lang === 'ja' ? 'EN' : 'JA'}
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 text-muted-foreground" onClick={toggleTheme}>
+              {theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
             </Button>
           </nav>
         </div>
