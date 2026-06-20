@@ -481,10 +481,11 @@ export default function App() {
 
   const ps = planetSeeds(portalNumber, galaxyNumber);
   const planetNames = ps.planet_seeds.map((seed, i) => ({
-    index: i + 1,
+    id: String(i + 1),
     seed: `0x${seed.toString(16).toUpperCase().padStart(16, '0')}`,
     name: planetName(seed),
   }));
+
   const planetCount = planetNames.length;
 
   return (
@@ -513,14 +514,13 @@ export default function App() {
                   onChange={(v) => update('galaxy', v)}
                   labelClass="text-red-400"
                 />
-                <FormField
+                <ComboField
                   label="惑星番号"
                   tooltip="1,2は全ての惑星に存在します。"
                   hint={`1 ~ ${String(planetCount)}`}
+                  options={planetNames}
                   value={form.planet}
                   onChange={(v) => update('planet', v)}
-                  min={1}
-                  max={planetCount}
                   labelClass="text-orange-400"
                 />
                 <FormField
