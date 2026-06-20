@@ -1,2 +1,5 @@
 allowBuilds:
+  esbuild: true
+  sharp: true
   system-name-calculator-ts: true
+  workerd: true
