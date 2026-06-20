@@ -40,7 +40,7 @@ importers:
         version: 4.11.0(typescript@6.0.3)
       system-name-calculator-ts:
         specifier: https://codeberg.org/pithos/system-name-calculator-ts.git
-        version: git+https://codeberg.org/pithos/system-name-calculator-ts.git#bf887d9e8a3e420c03c696191cabec0ed14d799a
+        version: git+https://codeberg.org/pithos/system-name-calculator-ts.git#3f9bce552dc3989e419d015debdcdf7827632c6e
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
@@ -2762,8 +2762,8 @@ packages:
     resolution: {integrity: sha512-aulFJcD6YK8V1G7iRB5tigAP4TsHBZZrOV8pjV++zdUwmeV8uzbY7yn6h9MswN62adStNZFuCIx4haBnRuMDaw==}
     engines: {node: '>=18'}
 
-  system-name-calculator-ts@git+https://codeberg.org/pithos/system-name-calculator-ts.git#bf887d9e8a3e420c03c696191cabec0ed14d799a:
-    resolution: {commit: bf887d9e8a3e420c03c696191cabec0ed14d799a, repo: https://codeberg.org/pithos/system-name-calculator-ts.git, type: git}
+  system-name-calculator-ts@git+https://codeberg.org/pithos/system-name-calculator-ts.git#3f9bce552dc3989e419d015debdcdf7827632c6e:
+    resolution: {commit: 3f9bce552dc3989e419d015debdcdf7827632c6e, repo: https://codeberg.org/pithos/system-name-calculator-ts.git, type: git}
     version: 1.0.0
 
   tailwind-merge@3.6.0:
@@ -5724,7 +5724,7 @@ snapshots:
 
   strip-final-newline@4.0.0: {}
 
-  system-name-calculator-ts@git+https://codeberg.org/pithos/system-name-calculator-ts.git#bf887d9e8a3e420c03c696191cabec0ed14d799a: {}
+  system-name-calculator-ts@git+https://codeberg.org/pithos/system-name-calculator-ts.git#3f9bce552dc3989e419d015debdcdf7827632c6e: {}
 
   tailwind-merge@3.6.0: {}
 

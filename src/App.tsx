@@ -390,7 +390,7 @@ function HexKeypad({ onDigit }: { onDigit: (d: string) => void }) {
           key={d}
           variant="outline"
           size="sm"
-          className="h-9 w-full px-0 font-mono text-sm"
+          className="h-9 w-full px-0 font-mono text-4xl"
           style={{ fontFamily: 'NMS-Glyphs-Mono, monospace' }}
           onClick={() => onDigit(d)}
         >
@@ -444,7 +444,7 @@ function AddressInput({ onLoad }: AddressInputProps) {
             if (e.key === 'Enter') handleLoad();
           }}
         />
-        <Button onClick={handleLoad}>ロード</Button>
+        <Button onClick={handleLoad}>インポート</Button>
       </Field>
       <HexKeypad onDigit={appendDigit} />
     </div>
@@ -591,7 +591,7 @@ export default function App() {
                 system={systemName(portalNumber, galaxyNumber)}
                 region={regionName(portalNumber, galaxyNumber)}
               />
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">既存のアドレスをロード</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">既知のアドレスをインポート</p>
               <AddressInput onLoad={(f) => setForm(f)} />
             </section>
           </div>
