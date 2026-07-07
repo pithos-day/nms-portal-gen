@@ -700,7 +700,7 @@ function Main() {
                 region={regionName(portalNumber, galaxyNumber)}
               />
               <p className="text-[10px] text-muted-foreground uppercase tracking-[0.18em]">{t('section.importAddress')}</p>
-              <AddressInput onLoad={(f) => setForm(f)} />
+              <AddressInput onLoad={(f) => setForm((prev) => ({ ...f, galaxy: prev.galaxy }))} />
             </section>
           </div>
         </div>
