@@ -1,5 +1,5 @@
 allowBuilds:
   esbuild: true
   sharp: true
-  system-name-calculator-ts: true
   workerd: true
+  system-name-calculator-ts@https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c36dcafe447ae11077dab6ff29df76757ed6e39f: true
