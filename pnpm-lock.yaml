@@ -43,7 +43,7 @@ importers:
         version: 4.21.4(supports-color@10.2.2)
       system-name-calculator-ts:
         specifier: https://github.com/pithos-day/system-name-calculator-ts.git#v1.0.0
-        version: https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c36dcafe447ae11077dab6ff29df76757ed6e39f
+        version: https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c9dbd1ee95227a80abc69611fb2628607c20fdbf
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.7.0
@@ -3250,8 +3250,8 @@ packages:
     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
     engines: {node: '>=18'}
 
-  system-name-calculator-ts@https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c36dcafe447ae11077dab6ff29df76757ed6e39f:
-    resolution: {gitHosted: true, integrity: sha512-nmhYbVlqMkS4P01f2QLWMfpZVeP8YS7+yimgNLi9oJR5wtQGB6XY/tKqHk1ftStNROEKk8D0pEZH36VTbaxADw==, tarball: https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c36dcafe447ae11077dab6ff29df76757ed6e39f}
+  system-name-calculator-ts@https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c9dbd1ee95227a80abc69611fb2628607c20fdbf:
+    resolution: {gitHosted: true, integrity: sha512-HGd9r20ifpFCpfPYG1AoLbMMS+gXZVhrlYNSka4/8SwdY4PbppM+pQgbSp4JBEWVCzqQzhXWrpMqTZVezal0sg==, tarball: https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c9dbd1ee95227a80abc69611fb2628607c20fdbf}
     version: 1.0.0
 
   systeminformation@5.33.15:
@@ -6636,7 +6636,7 @@ snapshots:
 
   supports-color@10.2.2: {}
 
-  system-name-calculator-ts@https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c36dcafe447ae11077dab6ff29df76757ed6e39f: {}
+  system-name-calculator-ts@https://codeload.github.com/pithos-day/system-name-calculator-ts/tar.gz/c9dbd1ee95227a80abc69611fb2628607c20fdbf: {}
 
   systeminformation@5.33.15: {}
 
